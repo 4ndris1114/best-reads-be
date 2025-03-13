@@ -1,3 +1,63 @@
 {
-    
-}
+    "users": {
+      "_id": ObjectId,
+      "username": String,
+      "email": String,
+      "passwordHash": String,
+      "profilePicture": String,
+      "bio": String,
+      "createdAt": Date,
+      "updatedAt": Date,
+      "bookshelves": [
+        {
+          "name": String,
+          "books": [ObjectId] // References to book documents
+        }
+      ],
+      "readingProgress": [
+        {
+          "bookId": ObjectId,
+          "progress": Number, // Percentage or pages
+          "updatedAt": Date
+        }
+      ],
+      "followers": [ObjectId], // References to other users
+      "following": [ObjectId], // References to other users
+      "readingStats": {
+        "booksReadThisYear": Number,
+        "avgRatingGiven": Number,
+        "pagesRead": Number
+      }
+    },
+    "books": {
+      "_id": ObjectId,
+      "apiId": String, // ID from the external book API
+      "title": String,
+      "author": String,
+      "isbn": String,
+      "publishedDate": String,
+      "coverImage": String,
+      "genres": [String],
+      "ratings": [
+        {
+          "userId": ObjectId,
+          "rating": Number,
+          "review": String,
+          "createdAt": Date,
+          "updatedAt": Date
+        }
+      ],
+      "averageRating": Number
+    },
+    "activity": {
+      "_id": ObjectId,
+      "userId": ObjectId,
+      "type": String, // "review", "rating", "shelf_update", "progress_update"
+      "bookId": ObjectId,
+      "content": String, // Review text, rating, or update message
+      "createdAt": Date,
+      "updatedAt": Date
+    }
+  }
+
+  
