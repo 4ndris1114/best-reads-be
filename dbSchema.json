@@ -10,6 +10,7 @@
       "updatedAt": Date,
       "bookshelves": [
         {
+          "_id": ObjectId,
           "name": String,
           "books": [ObjectId] // References to book documents
         }

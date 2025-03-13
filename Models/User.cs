@@ -3,6 +3,8 @@ using MongoDB.Bson.Serialization.Attributes;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
+namespace BestReads.Models;
+
 public class User {
     [BsonId]
     [BsonRepresentation(BsonType.ObjectId)]
