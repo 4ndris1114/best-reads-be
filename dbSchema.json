@@ -8,13 +8,7 @@
       "bio": String,
       "createdAt": Date,
       "updatedAt": Date,
-      "bookshelves": [
-        {
-          "_id": ObjectId,
-          "name": String,
-          "books": [ObjectId] // References to book documents
-        }
-      ],
+      "bookshelves": [ObjectId], // References to bookshelves
       "readingProgress": [
         {
           "bookId": ObjectId,
@@ -49,6 +43,11 @@
         }
       ],
       "averageRating": Number
+    },
+    "bookshelves": {
+      "_id": ObjectId,
+      "name": String,
+      "books": [ObjectId] // References to book documents
     },
     "activity": {
       "_id": ObjectId,
