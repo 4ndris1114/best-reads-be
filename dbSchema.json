@@ -3,7 +3,7 @@
       "_id": ObjectId,
       "username": String,
       "email": String,
-      "passwordHash": String,
+      "password": String,
       "profilePicture": String,
       "bio": String,
       "createdAt": Date,
