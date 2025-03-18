@@ -1,17 +1,26 @@
 using DotNetEnv;
 using BestReads.Database;
+using BestReads.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
 Env.Load();
 var mongoDbConnectionString = Environment.GetEnvironmentVariable("MONGO_CONNECTION_STRING")!;
 
-// Add environment variables to the configuration
 builder.Configuration.AddEnvironmentVariables();
 
-//TODO: add controllers
-//TODO: add CORS
-//TODO: add repos - maybe come up with a way to automatically add them
+builder.Services.AddControllers();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", builder => 
+        builder.AllowAnyOrigin()
+               .AllowAnyMethod()
+               .AllowAnyHeader());
+});
+
+//TODO: add repos
+builder.Services.AddScoped<BookRepository>();
 
 // Add MongoDB connection service (singleton)
 builder.Services.AddSingleton<MongoDbContext>(sp =>
@@ -26,7 +35,7 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-//TODO: add cors
+app.UseCors("AllowAll");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -38,7 +47,7 @@ if (app.Environment.IsDevelopment())
 //TODO: add authentication
 //TODO: add authorization
 
-//TODO: map controllers
+app.MapControllers();
 
 Console.WriteLine("Starting application");
 app.Run();
