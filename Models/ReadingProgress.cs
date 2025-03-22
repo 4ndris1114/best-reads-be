@@ -16,5 +16,5 @@ public class ReadingProgress {
 
     [BsonElement("updatedAt")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-    public DateTime UpdatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 }
