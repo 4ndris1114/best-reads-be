@@ -1,6 +1,10 @@
 using System.ComponentModel.DataAnnotations;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 
 public class Rating {
+    [BsonId]
+    [BsonRepresentation(BsonType.ObjectId)]
     public ObjectId UserId { get; set; }
 
     [Range(1, 5)]
