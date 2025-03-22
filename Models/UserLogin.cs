@@ -1,4 +1,4 @@
-namespace compulsoryRest.Models;
+namespace BestReads.Models;
 
 public class UserLogin {
     public required string Email { get; set; }

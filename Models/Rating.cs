@@ -2,6 +2,8 @@ using System.ComponentModel.DataAnnotations;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
+namespace BestReads.Models;
+
 public class Rating {
     [BsonId]
     [BsonRepresentation(BsonType.ObjectId)]
