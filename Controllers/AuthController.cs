@@ -42,11 +42,6 @@ public class AuthController : ControllerBase {
             var existingUser = await _userRepository.GetByEmailAsync(user.Email);
             if (existingUser != null) {
                 return BadRequest("Email already exists");
-            } else {
-                var existingUsername = await _userRepository.GetByUsernameAsync(user.Username);
-                if (existingUsername != null) {
-                    return BadRequest("Username already exists");
-                }
             }
             
             //hash and salt pass
@@ -86,13 +81,13 @@ public class AuthController : ControllerBase {
     public async Task<ActionResult> LoginUser(UserLogin userLogin) {
         try {
             //validate user info
-            if (string.IsNullOrEmpty(userLogin.Username) || string.IsNullOrEmpty(userLogin.Password))
+            if (string.IsNullOrEmpty(userLogin.Email) || string.IsNullOrEmpty(userLogin.Password))
                 return BadRequest("Email and password are required");
             
             //check for existing email
-            var user = await _userRepository.GetByUsernameAsync(userLogin.Username);
+            var user = await _userRepository.GetByEmailAsync(userLogin.Email);
             if (user == null)
-                return BadRequest("Username not found");
+                return BadRequest("Email not found");
 
             //verify password
             if (!VerifyPassword(userLogin.Password, user.Password!))
