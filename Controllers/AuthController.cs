@@ -42,6 +42,11 @@ public class AuthController : ControllerBase {
             var existingUser = await _userRepository.GetByEmailAsync(user.Email);
             if (existingUser != null) {
                 return BadRequest("Email already exists");
+            } else {
+                var existingUsername = await _userRepository.GetByUsernameAsync(user.Username);
+                if (existingUsername != null) {
+                    return BadRequest("Username already exists");
+                }
             }
             
             //hash and salt pass
