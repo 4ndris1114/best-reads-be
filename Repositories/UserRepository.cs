@@ -13,4 +13,8 @@ public class UserRepository : BaseRepository<User> {
     public async Task<User?> GetByEmailAsync(string email) {
         return await _users.Find(u => u.Email == email).FirstOrDefaultAsync();
     }
+
+    public async Task<User?> GetByUsernameAsync(string username) {
+        return await _users.Find(u => u.Username == username).FirstOrDefaultAsync();
+    }
 }
