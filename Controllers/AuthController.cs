@@ -91,7 +91,7 @@ public class AuthController : ControllerBase {
 
             //verify password
             if (!VerifyPassword(userLogin.Password, user.Password!))
-                return BadRequest("Invalid password");
+                return BadRequest("Incorrect password");
             
             //create jwt token
             var token = GenerateJwtToken(user);
