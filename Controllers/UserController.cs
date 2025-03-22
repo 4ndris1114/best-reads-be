@@ -8,6 +8,7 @@ using System.Text;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
+using MongoDB.Bson;
 
 namespace BestReads.Controllers;
 
@@ -31,7 +32,7 @@ public class AuthController : ControllerBase {
     /// <param name="user">The user details to register.</param>
     /// <returns>A success message if the registration is successful.</returns>
     [HttpPost("register")]
-    public async Task<ActionResult> RegisterUser(User user) {
+    public async Task<ActionResult> RegisterUser(UserRegister user) {
         try {
             //validate user info
             if (string.IsNullOrEmpty(user.Email) || string.IsNullOrEmpty(user.Password))
@@ -45,7 +46,24 @@ public class AuthController : ControllerBase {
             //hash and salt pass
             user.Password = HashPassword(user.Password);
 
-            await _userRepository.CreateAsync(user);
+            var userToCreate = new User {
+                Username = user.Username,
+                Email = user.Email,
+                Password = user.Password,
+                ProfilePicture = "default_profile_picture.jpg",
+                Bio = $"{user.Username}'s bio",
+                Bookshelves = new List<Bookshelf> {
+                    new Bookshelf { Id = ObjectId.GenerateNewId(), Name = "Currently Reading", Books = new List<ObjectId>() },
+                    new Bookshelf { Id = ObjectId.GenerateNewId(), Name = "Want to Read", Books = new List<ObjectId>() },
+                    new Bookshelf {Id = ObjectId.GenerateNewId(),  Name = "Read", Books = new List<ObjectId>() },
+                },
+                ReadingProgress = new List<ReadingProgress>(),
+                Followers = new List<string>(),
+                Following = new List<string>(),
+                ReadingStats = new ReadingStats(),
+            };
+
+            await _userRepository.CreateAsync(userToCreate);
             return Ok("User registered successfully");
         } catch (Exception ex) {
             _logger.LogError(ex, "Error registering user");
