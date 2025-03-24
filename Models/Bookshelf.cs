@@ -15,5 +15,5 @@ public class Bookshelf{
     public string? Name { get; set; }
     
     [BsonElement("books")]
-    public List<ObjectId>? Books { get; set; }
+    public List<string>? Books { get; set; }
 }

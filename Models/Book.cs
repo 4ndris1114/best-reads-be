@@ -6,7 +6,7 @@ namespace BestReads.Models;
 public class Book {
     [BsonId]
     [BsonRepresentation(BsonType.ObjectId)]
-    public ObjectId Id { get; set; }
+    public string? Id { get; set; }
 
     [BsonElement("apiId")]
     [StringLength(50, MinimumLength = 1)]
