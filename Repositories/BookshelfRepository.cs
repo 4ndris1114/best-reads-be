@@ -103,10 +103,24 @@ public class BookshelfRepository {
     // Move a book from one shelf to another
     public async Task MoveBookToAnotherBookshelfAsync(string userId, string fromShelfId, string toShelfId, string bookId) {
         try {
-            // Remove from source shelf
-            await RemoveBookFromBookshelfAsync(userId, fromShelfId, bookId);
-            // Add to target shelf
-            await AddBookToBookshelfAsync(userId, toShelfId, bookId);
+            using (var session = await _users.Database.Client.StartSessionAsync())
+            {
+                session.StartTransaction();
+                try
+                {
+                    // Remove from source shelf
+                    await RemoveBookFromBookshelfAsync(userId, fromShelfId, bookId);
+                    // Add to target shelf
+                    await AddBookToBookshelfAsync(userId, toShelfId, bookId);
+
+                    await session.CommitTransactionAsync();
+                }
+                catch (Exception)
+                {
+                    await session.AbortTransactionAsync();
+                    throw;
+                }
+            }
         } catch (Exception ex) {
             _logger.LogError(ex, $"Error moving book {bookId} from shelf {fromShelfId} to shelf {toShelfId} for user {userId}");
             throw;
