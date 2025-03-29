@@ -8,7 +8,7 @@ namespace BestReads.Models;
 public class Bookshelf{
     [BsonId]
     [BsonRepresentation(BsonType.ObjectId)]
-    public ObjectId Id { get; set; }
+    public ObjectId Id { get; set; } = ObjectId.GenerateNewId();
 
     [BsonElement("name")]
     [MinLength(1, ErrorMessage = "Bookshelf name must be at least 1 character long"), MaxLength(50, ErrorMessage = "Bookshelf name must be at most 50 characters long")]
