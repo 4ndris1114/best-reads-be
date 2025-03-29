@@ -23,9 +23,12 @@ builder.Services.AddCors(options =>
                .AllowAnyHeader());
 });
 
-//TODO: add repos
-builder.Services.AddScoped<BookRepository>();
-builder.Services.AddScoped<UserRepository>();
+var assembly = typeof(Program).Assembly;
+foreach (var type in assembly.GetTypes()
+    .Where(t => t.IsClass && t.Name.EndsWith("Repository")))
+{
+    builder.Services.AddScoped(type);
+}
 
 // Add MongoDB connection service (singleton)
 builder.Services.AddSingleton<MongoDbContext>(sp =>
