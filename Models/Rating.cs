@@ -7,7 +7,7 @@ namespace BestReads.Models;
 public class Rating {
     [BsonId]
     [BsonRepresentation(BsonType.ObjectId)]
-    public ObjectId UserId { get; set; }
+    public string? UserId { get; set; }
 
     [Range(1, 5)]
     public double RatingValue { get; set; }
