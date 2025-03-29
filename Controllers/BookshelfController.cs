@@ -153,10 +153,10 @@ public class BookshelfController : ControllerBase {
                 return BadRequest($"Missing or invalid required parameter: {missing}");
             }
             var bookShelf = await _bookshelfRepository.GetBookshelfByIdAsync(userId, shelfId);
-            if (bookShelf!.Books!.Contains(bookId)) {
-                return NotFound($"Book with ID {bookId} not found in bookshelf {shelfId} for user {userId}");
+            if (bookShelf?.Books != null && !bookShelf.Books.Contains(bookId)) {
+                return Conflict($"Book with ID {bookId} is not part of bookshelf {shelfId}.");
             }
-            
+
             await _bookshelfRepository.RemoveBookFromBookshelfAsync(userId, shelfId, bookId);
             return NoContent();
         } catch (Exception ex) {
