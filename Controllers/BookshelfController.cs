@@ -2,6 +2,7 @@ using BestReads.Models;
 using BestReads.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
+using System.Linq;
 
 namespace BestReads.Controllers;
 
@@ -9,10 +10,13 @@ namespace BestReads.Controllers;
 [Route("api/[controller]/{userId}")]
 public class BookshelfController : ControllerBase {
     private readonly BookshelfRepository _bookshelfRepository;
+    private readonly BookRepository _bookRepository;
+
     private readonly ILogger<BookshelfController> _logger;
 
-    public BookshelfController(BookshelfRepository bookshelfRepository, ILogger<BookshelfController> logger) {
+    public BookshelfController(BookshelfRepository bookshelfRepository, BookRepository bookRepository, ILogger<BookshelfController> logger) {
         _bookshelfRepository = bookshelfRepository;
+        _bookRepository = bookRepository;
         _logger = logger;
     }
 
@@ -31,6 +35,25 @@ public class BookshelfController : ControllerBase {
         }
     }
 
+    // GET: api/bookshelf/{userId}/{bookshelfId}
+    [HttpGet("{shelfId}")]
+    public async Task<ActionResult<Bookshelf>> GetBookshelf(string userId, string shelfId) {
+        try {
+            if (!ValidateInputs(out var missing, (userId, "userId"), (shelfId, "shelfId"))) {
+                return BadRequest($"Missing or invalid required parameter: {missing}");
+            }
+            var bookshelf = await _bookshelfRepository.GetBookshelfByIdAsync(userId, shelfId);
+
+            if (bookshelf == null) {
+                return NotFound($"Bookshelf with ID {shelfId} not found for user {userId}");
+            }
+            return Ok(bookshelf);
+        } catch (Exception ex) {
+            _logger.LogError(ex, $"Failed to retrieve bookshelf {shelfId} for user {userId}");
+            return StatusCode(500, "An error occurred while retrieving the bookshelf.");
+        }
+    }
+
     // POST: api/bookshelf/{userId}
     [HttpPost]
     public async Task<ActionResult> CreateBookshelf(string userId, [FromBody] Bookshelf newShelf) {
@@ -40,6 +63,10 @@ public class BookshelfController : ControllerBase {
             }
             if (newShelf == null || string.IsNullOrWhiteSpace(newShelf.Name)) {
                 return BadRequest("Bookshelf must have a valid name.");
+            }
+            var bookshelves = await _bookshelfRepository.GetAllBookshelvesAsync(userId);
+            if (bookshelves.Any(b => b.Name == newShelf.Name)) {
+                return Conflict($"You already have a bookshelf named {newShelf.Name}.");
             }
 
             await _bookshelfRepository.CreateBookshelfAsync(userId, newShelf);
@@ -57,6 +84,11 @@ public class BookshelfController : ControllerBase {
             if (!ValidateInputs(out var missing, (userId, "userId"), (shelfId, "shelfId"))) {
                 return BadRequest($"Missing or invalid required parameter: {missing}");
             }
+            var bookshelf = await _bookshelfRepository.GetBookshelfByIdAsync(userId, shelfId);
+            if (bookshelf == null) {
+                return NotFound($"Bookshelf with ID {shelfId} not found for user {userId}");
+            }
+            
             await _bookshelfRepository.DeleteBookshelfAsync(userId, shelfId);
             return NoContent();
         } catch (Exception ex) {
@@ -74,6 +106,10 @@ public class BookshelfController : ControllerBase {
             }
             if (string.IsNullOrWhiteSpace(newName)) {
                 return BadRequest("New name cannot be invalid.");
+            }
+            var bookshelves = await _bookshelfRepository.GetAllBookshelvesAsync(userId);
+            if (bookshelves.Any(b => b.Name == newName)) {
+                return Conflict($"You already have a bookshelf named {newName}.");
             }
 
             await _bookshelfRepository.RenameBookshelfAsync(userId, shelfId, newName);
@@ -95,6 +131,12 @@ public class BookshelfController : ControllerBase {
                 return BadRequest("Book ID is required.");
             }
 
+            // Check if the book exists
+            var book = await _bookRepository.GetByIdAsync(bookId);
+            if (book == null) {
+                return NotFound($"Book with ID '{bookId}' does not exist.");
+            }
+
             await _bookshelfRepository.AddBookToBookshelfAsync(userId, shelfId, bookId);
             return NoContent();
         } catch (Exception ex) {
@@ -110,6 +152,11 @@ public class BookshelfController : ControllerBase {
             if (!ValidateInputs(out var missing, (userId, "userId"), (shelfId, "shelfId"), (bookId, "bookId"))) {
                 return BadRequest($"Missing or invalid required parameter: {missing}");
             }
+            var bookShelf = await _bookshelfRepository.GetBookshelfByIdAsync(userId, shelfId);
+            if (bookShelf!.Books!.Contains(bookId)) {
+                return NotFound($"Book with ID {bookId} not found in bookshelf {shelfId} for user {userId}");
+            }
+            
             await _bookshelfRepository.RemoveBookFromBookshelfAsync(userId, shelfId, bookId);
             return NoContent();
         } catch (Exception ex) {

@@ -27,6 +27,22 @@ public class BookshelfRepository {
         }
     }
 
+    // Get a specific bookshelf
+    public async Task<Bookshelf?> GetBookshelfByIdAsync(string userId, string shelfId) {
+        try {
+            var filter = Builders<User>.Filter.Eq(u => u.Id, userId);
+            var projection = Builders<User>.Projection.Expression(u =>
+                u.Bookshelves!.FirstOrDefault(b => b.Id == shelfId)
+            );
+
+            var bookshelf = await _users.Find(filter).Project(projection).FirstOrDefaultAsync();
+            return bookshelf;
+        } catch (Exception ex) {
+            _logger.LogError(ex, $"Error getting bookshelf {shelfId} for user {userId}");
+            throw;
+        }
+    }
+
     // Create a new bookshelf for a user
     public async Task CreateBookshelfAsync(string userId, Bookshelf newShelf) {
         try {
