@@ -19,6 +19,9 @@ public class BookshelfController : ControllerBase {
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Bookshelf>>> GetAllBookshelves(string userId) {
         try {
+            if (!ValidateInputs(out var missing, (userId, "userId"))) {
+                return BadRequest($"Missing or empty required parameter: {missing}");
+            }
             var bookshelves = await _bookshelfRepository.GetAllBookshelvesAsync(userId);
             return Ok(bookshelves);
         } catch (Exception ex) {
@@ -31,6 +34,9 @@ public class BookshelfController : ControllerBase {
     [HttpPost]
     public async Task<ActionResult> CreateBookshelf(string userId, [FromBody] Bookshelf newShelf) {
         try {
+            if (!ValidateInputs(out var missing, (userId, "userId"))) {
+                return BadRequest($"Missing or empty required parameter: {missing}");
+            }
             if (newShelf == null || string.IsNullOrWhiteSpace(newShelf.Name)) {
                 return BadRequest("Bookshelf must have a valid name.");
             }
@@ -47,6 +53,9 @@ public class BookshelfController : ControllerBase {
     [HttpDelete("{shelfId}")]
     public async Task<ActionResult> DeleteBookshelf(string userId, string shelfId) {
         try {
+            if (!ValidateInputs(out var missing, (userId, "userId"), (shelfId, "shelfId"))) {
+                return BadRequest($"Missing or empty required parameter: {missing}");
+            }
             await _bookshelfRepository.DeleteBookshelfAsync(userId, shelfId);
             return NoContent();
         } catch (Exception ex) {
@@ -59,6 +68,9 @@ public class BookshelfController : ControllerBase {
     [HttpPut("{shelfId}/rename")]
     public async Task<ActionResult> RenameBookshelf(string userId, string shelfId, [FromBody] string newName) {
         try {
+            if (!ValidateInputs(out var missing, (userId, "userId"), (shelfId, "shelfId"))) {
+                return BadRequest($"Missing or empty required parameter: {missing}");
+            }
             if (string.IsNullOrWhiteSpace(newName)) {
                 return BadRequest("New name cannot be empty.");
             }
@@ -75,6 +87,9 @@ public class BookshelfController : ControllerBase {
     [HttpPost("{shelfId}/books")]
     public async Task<ActionResult> AddBookToBookshelf(string userId, string shelfId, [FromBody] string bookId) {
         try {
+            if (!ValidateInputs(out var missing, (userId, "userId"), (shelfId, "shelfId"))) {
+                return BadRequest($"Missing or empty required parameter: {missing}");
+            }
             if (string.IsNullOrWhiteSpace(bookId)) {
                 return BadRequest("Book ID is required.");
             }
@@ -91,6 +106,9 @@ public class BookshelfController : ControllerBase {
     [HttpDelete("{shelfId}/books/{bookId}")]
     public async Task<ActionResult> RemoveBookFromBookshelf(string userId, string shelfId, string bookId) {
         try {
+            if (!ValidateInputs(out var missing, (userId, "userId"), (shelfId, "shelfId"), (bookId, "bookId"))) {
+                return BadRequest($"Missing or empty required parameter: {missing}");
+            }
             await _bookshelfRepository.RemoveBookFromBookshelfAsync(userId, shelfId, bookId);
             return NoContent();
         } catch (Exception ex) {
@@ -103,11 +121,26 @@ public class BookshelfController : ControllerBase {
     [HttpPut("{sourceShelfId}/move/{bookId}/to/{targetShelfId}")]
     public async Task<ActionResult> MoveBook(string userId, string sourceShelfId, string bookId, string targetShelfId) {
         try {
+            if (!ValidateInputs(out var missing, (userId, "userId"), (sourceShelfId, "sourceShelfId"), (bookId, "bookId"), (targetShelfId, "targetShelfId"))) {
+                return BadRequest($"Missing or empty required parameter: {missing}");
+            }
             await _bookshelfRepository.MoveBookToAnotherBookshelfAsync(userId, sourceShelfId, bookId, targetShelfId);
             return NoContent();
         } catch (Exception ex) {
             _logger.LogError(ex, $"Failed to move book {bookId} from shelf {sourceShelfId} to {targetShelfId} for user {userId}");
             return StatusCode(500, "An error occurred while moving the book.");
         }
+    }
+
+    private bool ValidateInputs(out string? missingParam, params (string? Value, string Name)[] inputs) {
+        foreach (var (value, name) in inputs) {
+            if (string.IsNullOrWhiteSpace(value)) {
+                missingParam = name;
+                return false;
+            }
+        }
+
+        missingParam = null;
+        return true;
     }
 }
