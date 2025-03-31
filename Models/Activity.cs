@@ -7,7 +7,7 @@ namespace BestReads.Models;
 public class Activity {
     [BsonId]
     [BsonRepresentation(BsonType.ObjectId)]
-    public ObjectId Id { get; set; }
+    public string? Id { get; set; }
 
     [BsonElement("userId")]
     public ObjectId UserId { get; set; }
