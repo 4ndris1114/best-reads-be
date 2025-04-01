@@ -167,7 +167,7 @@ public class BookshelfController : ControllerBase {
 
     // PUT: api/bookshelf/{userId}/{sourceShelfId}/move/{bookId}/to/{targetShelfId}
     [HttpPut("{sourceShelfId}/move/{bookId}/to/{targetShelfId}")]
-    public async Task<ActionResult> MoveBook(string userId, string sourceShelfId, string bookId, string targetShelfId) {
+    public async Task<ActionResult> MoveBookToAnotherBookshelf(string userId, string sourceShelfId, string bookId, string targetShelfId) {
         try {
             if (!ValidateInputs(out var missing, (userId, "userId"), (sourceShelfId, "sourceShelfId"), (bookId, "bookId"), (targetShelfId, "targetShelfId"))) {
                 return BadRequest($"Missing or invalid required parameter: {missing}");
