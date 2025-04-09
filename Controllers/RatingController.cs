@@ -24,6 +24,12 @@ namespace BestReads.Controllers
         }
 
         // GET: api/rating/{userId}/book/{bookId}
+        /// <summary>
+        /// Get all ratings for a specific book
+        /// </summary>
+        /// <param name="userId">The unique identifier for the user.</param>
+        /// <param name="bookId">The unique identifier for the book.</param>
+        /// <returns>A list of ratings</returns>
         [HttpGet("book/{bookId}")]
         public async Task<ActionResult<IEnumerable<Rating>>> GetRatingsForBook(string userId, string bookId)
         {
@@ -45,6 +51,13 @@ namespace BestReads.Controllers
         }
 
         // POST: api/rating/{userId}/book/{bookId}
+        /// <summary>
+        /// Add a rating to a specific book
+        /// </summary>
+        /// <param name="userId">The unique identifier for the user.</param>
+        /// <param name="bookId">The unique identifier for the book.</param>
+        /// <param name="newRating">The rating object to add.</param>
+        /// <returns></returns>
         [HttpPost("book/{bookId}")]
         public async Task<ActionResult> AddRatingToBook(string userId, string bookId, [FromBody] Rating newRating)
         {
@@ -78,6 +91,13 @@ namespace BestReads.Controllers
         }
 
         // PUT: api/rating/{userId}/book/{bookId}
+        /// <summary>
+        /// Update the rating of a specific user on a specific book
+        /// </summary>
+        /// <param name="userId">The unique identifier for the user.</param>
+        /// <param name="bookId">The unique identifier for the book.</param>
+        /// <param name="updatedRating">The updated rating object.</param>
+        /// <returns></returns>
         [HttpPut("book/{bookId}")]
         public async Task<ActionResult> UpdateUserRating(string userId, string bookId, [FromBody] Rating updatedRating)
         {
@@ -111,6 +131,12 @@ namespace BestReads.Controllers
         }
 
         // DELETE: api/rating/{userId}/book/{bookId}
+        /// <summary>
+        /// Remove the rating of a specific user on a specific book
+        /// </summary>
+        /// <param name="userId">The unique identifier for the user.</param>
+        /// <param name="bookId">The unique identifier for the book.</param>
+        /// <returns></returns>
         [HttpDelete("book/{bookId}")]
         public async Task<ActionResult> RemoveUserRating(string userId, string bookId)
         {
@@ -140,6 +166,12 @@ namespace BestReads.Controllers
         }
 
         // GET: api/rating/{userId}/book/{bookId}/average
+        /// <summary>
+        /// Get the average rating for a specific book
+        /// </summary>
+        /// <param name="userId">The unique identifier for the user.</param>
+        /// <param name="bookId">The unique identifier for the book.</param>
+        /// <returns></returns>
         [HttpGet("book/{bookId}/average")]
         public async Task<ActionResult<double?>> GetAverageRatingForBook(string userId, string bookId)
         {

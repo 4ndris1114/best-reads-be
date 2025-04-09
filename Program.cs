@@ -61,8 +61,9 @@ builder.Services.AddSwaggerGen(c =>
         Name = "Authorization",
         Type = SecuritySchemeType.ApiKey,
         Scheme = "Bearer"
-    });
 
+    });
+    
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
@@ -77,6 +78,8 @@ builder.Services.AddSwaggerGen(c =>
             new string[] {}
         }
     });
+    var xmlFile = Path.Combine(AppContext.BaseDirectory, "best-reads-be.xml");
+    c.IncludeXmlComments(xmlFile);
 });
 
 builder.Services.AddAuthorization();  // To use authorization
@@ -89,7 +92,11 @@ app.UseCors("AllowAll");
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "BestReads API v1");
+        options.RoutePrefix = string.Empty;  // Swagger UI at root URL
+    });
 }
 
 app.UseAuthentication(); // Add authentication middleware
