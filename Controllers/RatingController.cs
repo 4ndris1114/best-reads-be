@@ -54,7 +54,7 @@ namespace BestReads.Controllers
                 {
                     return BadRequest($"Missing or invalid required parameter: {missing}");
                 }
-                if (newRating == null || newRating.Rating < 1 || newRating.Rating > 5)
+                if (newRating == null || newRating.RatingValue < 1 || newRating.RatingValue > 5)
                 {
                     return BadRequest("Invalid rating value. Rating must be between 1 and 5.");
                 }
@@ -87,7 +87,7 @@ namespace BestReads.Controllers
                 {
                     return BadRequest($"Missing or invalid required parameter: {missing}");
                 }
-                if (updatedRating == null || updatedRating.Rating < 1 || updatedRating.Rating > 5)
+                if (updatedRating == null || updatedRating.RatingValue < 1 || updatedRating.RatingValue > 5)
                 {
                     return BadRequest("Invalid rating value. Rating must be between 1 and 5.");
                 }
