@@ -113,7 +113,7 @@ public class BookshelfController : ControllerBase {
             }
 
             await _bookshelfRepository.RenameBookshelfAsync(userId, shelfId, newName);
-            return NoContent();
+            return Ok(nameof(GetBookshelf), new { userId, shelfId });
         } catch (Exception ex) {
             _logger.LogError(ex, $"Failed to rename bookshelf {shelfId} for user {userId}");
             return StatusCode(500, "An error occurred while renaming the bookshelf.");
