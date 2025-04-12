@@ -137,6 +137,11 @@ public class BookshelfController : ControllerBase {
                 return NotFound($"Book with ID '{bookId}' does not exist.");
             }
 
+            var bookshelf = await _bookshelfRepository.GetBookshelfByIdAsync(userId, shelfId);
+            if (bookshelf.Books != null && bookshelf.Books.Contains(bookId)) {
+                return BadRequest($"Book with ID '{bookId}' is already in the bookshelf.");
+            }
+
             await _bookshelfRepository.AddBookToBookshelfAsync(userId, shelfId, bookId);
             return NoContent();
         } catch (Exception ex) {
