@@ -178,7 +178,7 @@ public class BookshelfController : ControllerBase {
                 return BadRequest($"Missing or invalid required parameter: {missing}");
             }
             await _bookshelfRepository.MoveBookToAnotherBookshelfAsync(userId, sourceShelfId, bookId, targetShelfId);
-            return NoContent();
+            return Ok(bookId);
         } catch (Exception ex) {
             _logger.LogError(ex, $"Failed to move book {bookId} from shelf {sourceShelfId} to {targetShelfId} for user {userId}");
             return StatusCode(500, "An error occurred while moving the book.");
