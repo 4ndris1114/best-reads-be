@@ -16,4 +16,7 @@ public class Bookshelf{
     
     [BsonElement("books")]
     public List<string>? Books { get; set; }
+
+    [BsonElement("isMutable")]
+    public bool IsMutable { get; set; } = true;
 }

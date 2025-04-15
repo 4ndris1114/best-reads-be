@@ -16,6 +16,10 @@ public class Book {
     [StringLength(100, MinimumLength = 1)]
     public string Title { get; set; } = string.Empty;
 
+    [BsonElement("description")]
+    [StringLength(5000, MinimumLength = 1)]
+    public string Description { get; set; } = string.Empty;
+
     [BsonElement("author")]
     [StringLength(100, MinimumLength = 1)]
     public string Author { get; set; } = string.Empty;

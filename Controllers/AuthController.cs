@@ -59,9 +59,9 @@ public class AuthController : ControllerBase {
                 ProfilePicture = "default_profile_picture.jpg",
                 Bio = $"{user.Username}'s bio",
                 Bookshelves = new List<Bookshelf> {
-                    new Bookshelf { Id = ObjectId.GenerateNewId().ToString(), Name = "Currently Reading", Books = new List<string>() },
-                    new Bookshelf { Id = ObjectId.GenerateNewId().ToString(), Name = "Want to Read", Books = new List<string>() },
-                    new Bookshelf { Id = ObjectId.GenerateNewId().ToString(), Name = "Read", Books = new List<string>() },
+                    new Bookshelf { Id = ObjectId.GenerateNewId().ToString(), Name = "Currently Reading", Books = new List<string>(), IsMutable = false },
+                    new Bookshelf { Id = ObjectId.GenerateNewId().ToString(), Name = "Want to Read", Books = new List<string>(), IsMutable = false },
+                    new Bookshelf { Id = ObjectId.GenerateNewId().ToString(), Name = "Read", Books = new List<string>(), IsMutable = false },
                 },
                 ReadingProgress = new List<ReadingProgress>(),
                 Followers = new List<string>(),
