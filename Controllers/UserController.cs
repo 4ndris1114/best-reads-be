@@ -28,4 +28,21 @@ public class UserController : ControllerBase
             return StatusCode(500, $"Couldn't get user with id {id}");
         }
     }
+
+    [HttpPut("{id}/edit")]
+    public async Task<ActionResult<User>> EditUser(string id, User user) {
+        try {
+            var userById = await _userRepository.GetByIdAsync(id);
+            if (userById != null) {
+                user.Password = userById.Password;
+            }
+            var updatedUser = await _userRepository.EditUserAsync(id, user);
+            if (updatedUser == null)
+                return NotFound("User not found");
+            return Ok(updatedUser);
+        } catch (Exception ex) {
+            _logger.LogError(ex, $"Error updating user with id {id}");
+            return StatusCode(500, $"Couldn't update user with id {id}");
+        }
+    }
 }
