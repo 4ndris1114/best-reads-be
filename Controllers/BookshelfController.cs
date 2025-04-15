@@ -143,7 +143,7 @@ public class BookshelfController : ControllerBase {
             }
 
             await _bookshelfRepository.AddBookToBookshelfAsync(userId, shelfId, bookId);
-            return NoContent();
+            return Ok(bookId);
         } catch (Exception ex) {
             _logger.LogError(ex, $"Failed to add book {bookId} to shelf {shelfId} for user {userId}");
             return StatusCode(500, "An error occurred while adding the book.");
