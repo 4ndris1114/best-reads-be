@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Text;
 using Microsoft.OpenApi.Models;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -54,6 +55,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddSwaggerGen(c =>
 {
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "BestReads API", Version = "v1", Description = "The API for the BestReads application" });
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         In = ParameterLocation.Header,
@@ -61,8 +63,9 @@ builder.Services.AddSwaggerGen(c =>
         Name = "Authorization",
         Type = SecuritySchemeType.ApiKey,
         Scheme = "Bearer"
-    });
 
+    });
+    
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
@@ -77,6 +80,8 @@ builder.Services.AddSwaggerGen(c =>
             new string[] {}
         }
     });
+    var xmlFile = Path.Combine(AppContext.BaseDirectory, "best-reads-be.xml");
+    c.IncludeXmlComments(xmlFile);
 });
 
 builder.Services.AddAuthorization();  // To use authorization
@@ -89,7 +94,11 @@ app.UseCors("AllowAll");
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "BestReads API v1");
+        options.RoutePrefix = string.Empty;  // Swagger UI at root URL
+    });
 }
 
 app.UseAuthentication(); // Add authentication middleware

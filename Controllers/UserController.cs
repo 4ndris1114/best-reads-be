@@ -15,7 +15,11 @@ public class UserController : ControllerBase
         _logger = logger;
         _userRepository = userRepository;
     }
-
+/// <summary>
+/// Get a specific user
+/// </summary>
+/// <param name="id">The unique identifier for the user</param>
+/// <returns>A user object</returns>
     [HttpGet("{id}")]
     public async Task<ActionResult<User>> GetUserById(string id) {
         try {

@@ -20,6 +20,11 @@ public class BookController : BaseController<Book> {
         _bookRepository = bookRepository;
         _logger = logger;
     }
+// GET: api/book/
+/// <summary>
+    /// Get all ratings for a specific book
+    /// </summary>
+    /// <returns>A list of books</returns>
 
     public override async Task<ActionResult<IEnumerable<Book>>> GetAll() {
         try {
@@ -30,7 +35,11 @@ public class BookController : BaseController<Book> {
             return StatusCode(500, "Error fetching books");
         }
     }
-
+/// <summary>
+/// Get a specific book
+/// </summary>
+/// <param name="id">The unique identifier for the book</param>
+/// <returns> A book object</returns>
     public override async Task<ActionResult<Book>> GetById(string id) {
         try {
             if (!ObjectId.TryParse(id, out _))
@@ -43,7 +52,11 @@ public class BookController : BaseController<Book> {
             return StatusCode(500, $"Couldn't fetch book with id {id}");
         }
     }
-
+/// <summary>
+/// Create a new book
+/// </summary>
+/// <param name="book"> The book object to create</param>
+/// <returns> A newly created book object</returns>
     public override async Task<ActionResult<Book>> Create(Book book) {
         try {
             ValidateBook(book);
@@ -58,6 +71,12 @@ public class BookController : BaseController<Book> {
         }
     }
 
+/// <summary>
+/// Update an existing book
+/// </summary>
+/// <param name="id">A unique identifier for the book</param>
+/// <param name="book">A book object</param>
+/// <returns>A book object</returns>
     public override async Task<ActionResult<Book>> Update(string id, Book book) {
         try {
             if (GetById(id) == null)
@@ -77,7 +96,11 @@ public class BookController : BaseController<Book> {
             return StatusCode(500, $"Couldn't update book with id {id}");
         }
     }
-
+/// <summary>
+/// Delete a book
+/// </summary>
+/// <param name="id">A unique identifier for the book</param>
+/// <returns></returns>
     public override async Task<ActionResult<Book>> Delete(string id) {
         try {
             var existingBook = await _bookRepository.GetByIdAsync(id);
@@ -91,7 +114,11 @@ public class BookController : BaseController<Book> {
             return StatusCode(500, $"Couldn't delete book with id {id}");
         }
     }
-
+/// <summary>
+/// Get books by title
+/// </summary>
+/// <param name="title">A book title</param>
+/// <returns> A list of books</returns>
     [HttpGet("title/{title}")]
     public async Task<ActionResult<IEnumerable<Book>>> GetBooksByTitle(string title) {
         try {
@@ -102,7 +129,11 @@ public class BookController : BaseController<Book> {
             return StatusCode(500, "Error fetching books by title");
         }
     }
-
+/// <summary>
+/// Get books by author
+/// </summary>
+/// <param name="author">A book author</param>
+/// <returns> A list of books</returns>
     [HttpGet("author/{author}")]
     public async Task<ActionResult<IEnumerable<Book>>> GetBooksByAuthor(string author) {
         try {
