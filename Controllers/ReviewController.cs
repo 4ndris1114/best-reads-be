@@ -78,6 +78,7 @@ namespace BestReads.Controllers
                 }
 
                 // Add the review
+                newReview.Id = ObjectId.GenerateNewId().ToString();
                 await _reviewRepository.AddReviewToBookAsync(bookId, newReview);
                 return CreatedAtAction(nameof(GetReviewsForBook), new { bookId }, newReview);
             }
