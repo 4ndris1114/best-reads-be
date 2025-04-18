@@ -31,7 +31,7 @@ namespace BestReads.Controllers
         /// <param name="bookId">The unique identifier for the book.</param>
         /// <returns>A list of reviews</returns>
         [HttpGet("book/{bookId}")]
-        public async Task<ActionResult<IEnumerable<Review>>> GetReviewsForBook(string userId, string bookId)
+        public async Task<ActionResult<IEnumerable<Review>>> GetReviewsForBook(string bookId)
         {
             try
             {
@@ -59,7 +59,7 @@ namespace BestReads.Controllers
         /// <param name="newReview">The review object to add.</param>
         /// <returns></returns>
         [HttpPost("book/{bookId}")]
-        public async Task<ActionResult> AddReviewToBook(string userId, string bookId, [FromBody] Review newReview)
+        public async Task<ActionResult> AddReviewToBook(string bookId, [FromBody] Review newReview)
         {
             try
             {
@@ -81,7 +81,7 @@ namespace BestReads.Controllers
 
                 // Add the review
                 await _reviewRepository.AddReviewToBookAsync(bookId, newReview);
-                return NoContent();
+                return CreatedAtAction(nameof(GetReviewsForBook), new { userId, bookId }, newReview);
             }
             catch (Exception ex)
             {
@@ -99,7 +99,7 @@ namespace BestReads.Controllers
         /// <param name="updatedReview">The updated review object.</param>
         /// <returns></returns>
         [HttpPut("book/{bookId}")]
-        public async Task<ActionResult> UpdateUserReview(string userId, string bookId, [FromBody] Review updatedReview)
+        public async Task<ActionResult> UpdateUserReview(string bookId, [FromBody] Review updatedReview)
         {
             try
             {
@@ -138,7 +138,7 @@ namespace BestReads.Controllers
         /// <param name="bookId">The unique identifier for the book.</param>
         /// <returns></returns>
         [HttpDelete("book/{bookId}")]
-        public async Task<ActionResult> RemoveUserReview(string userId, string bookId)
+        public async Task<ActionResult> RemoveUserReview(string bookId)
         {
             try
             {
@@ -173,7 +173,7 @@ namespace BestReads.Controllers
         /// <param name="bookId">The unique identifier for the book.</param>
         /// <returns></returns>
         [HttpGet("book/{bookId}/average")]
-        public async Task<ActionResult<double?>> GetAverageRatingForBook(string userId, string bookId)
+        public async Task<ActionResult<double?>> GetAverageRatingForBook(string bookId)
         {
             try
             {
