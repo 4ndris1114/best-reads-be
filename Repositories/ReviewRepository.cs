@@ -41,35 +41,35 @@ namespace BestReads.Repositories {
             }
         }
 
-        // Update the review of a specific user on a book
-        public async Task UpdateUserReviewAsync(string bookId, string userId, Review updatedReview) {
-            try {
-                var filter = Builders<Book>.Filter.And(
-                    Builders<Book>.Filter.Eq(b => b.Id, bookId),
-                    Builders<Book>.Filter.ElemMatch(b => b.Reviews, r => r.UserId == userId)
-                );
+        // // Update the review of a specific user on a book
+        // public async Task UpdateUserReviewAsync(string bookId, string userId, Review updatedReview) {
+        //     try {
+        //         var filter = Builders<Book>.Filter.And(
+        //             Builders<Book>.Filter.Eq(b => b.Id, bookId),
+        //             Builders<Book>.Filter.ElemMatch(b => b.Reviews, r => r.UserId == userId)
+        //         );
 
-                var update = Builders<Book>.Update.Set("reviews.$.rating", updatedReview.RatingValue); // Update specific user's rating
+        //         var update = Builders<Book>.Update.Set("reviews.$.rating", updatedReview.RatingValue); // Update specific user's rating
 
-                await _books.UpdateOneAsync(filter, update);
-            } catch (Exception ex) {
-                _logger.LogError(ex, $"Error updating rating for user {userId} on book {bookId}");
-                throw;
-            }
-        }
+        //         await _books.UpdateOneAsync(filter, update);
+        //     } catch (Exception ex) {
+        //         _logger.LogError(ex, $"Error updating rating for user {userId} on book {bookId}");
+        //         throw;
+        //     }
+        // }
 
-        // Remove a review from a book
-        public async Task RemoveReviewFromBookAsync(string bookId, string userId) {
-            try {
-                var filter = Builders<Book>.Filter.Eq(b => b.Id, bookId);
-                var update = Builders<Book>.Update.PullFilter(b => b.Reviews, r => r.UserId == userId);
+        // // Remove a review from a book
+        // public async Task RemoveReviewFromBookAsync(string bookId, string userId) {
+        //     try {
+        //         var filter = Builders<Book>.Filter.Eq(b => b.Id, bookId);
+        //         var update = Builders<Book>.Update.PullFilter(b => b.Reviews, r => r.UserId == userId);
 
-                await _books.UpdateOneAsync(filter, update);
-            } catch (Exception ex) {
-                _logger.LogError(ex, $"Error removing review for user {userId} on book {bookId}");
-                throw;
-            }
-        }
+        //         await _books.UpdateOneAsync(filter, update);
+        //     } catch (Exception ex) {
+        //         _logger.LogError(ex, $"Error removing review for user {userId} on book {bookId}");
+        //         throw;
+        //     }
+        // }
 
         // Get the average review for a book
         public async Task<double?> GetAverageRatingForBookAsync(string bookId) {
