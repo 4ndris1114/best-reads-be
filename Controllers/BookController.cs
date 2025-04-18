@@ -22,7 +22,7 @@ public class BookController : BaseController<Book> {
     }
 // GET: api/book/
 /// <summary>
-    /// Get all ratings for a specific book
+    /// Get all books
     /// </summary>
     /// <returns>A list of books</returns>
 

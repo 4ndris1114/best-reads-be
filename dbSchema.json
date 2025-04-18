@@ -37,10 +37,10 @@
       "publishedDate": String,
       "coverImage": String,
       "genres": [String],
-      "ratings": [
+      "reviews": [
         {
           "userId": ObjectId,
-          "rating": Number,
+          "ratingValue": Number,
           "review": String,
           "createdAt": Date,
           "updatedAt": Date

@@ -4,7 +4,7 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace BestReads.Models;
 
-public class Rating {
+public class Review {
     [BsonId]
     [BsonRepresentation(BsonType.ObjectId)]
     public string? UserId { get; set; }
@@ -13,7 +13,7 @@ public class Rating {
     public double RatingValue { get; set; }
 
     [MaxLength(1000)]
-    public string Review { get; set; } = string.Empty;
+    public string ReviewText { get; set; } = string.Empty;
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

@@ -10,28 +10,28 @@ namespace BestReads.Controllers
 {
     [ApiController]
     [Route("api/[controller]/{userId}")]
-    public class RatingController : ControllerBase
+    public class ReviewController : ControllerBase
     {
-        private readonly RatingRepository _ratingRepository;
+        private readonly ReviewRepository _reviewRepository;
         private readonly BookRepository _bookRepository;
-        private readonly ILogger<RatingController> _logger;
+        private readonly ILogger<ReviewController> _logger;
 
-        public RatingController(RatingRepository ratingRepository, BookRepository bookRepository, ILogger<RatingController> logger)
+        public ReviewController(ReviewRepository reviewRepository, BookRepository bookRepository, ILogger<ReviewController> logger)
         {
-            _ratingRepository = ratingRepository;
+            _reviewRepository = reviewRepository;
             _bookRepository = bookRepository;
             _logger = logger;
         }
 
-        // GET: api/rating/{userId}/book/{bookId}
+        // GET: api/review/{userId}/book/{bookId}
         /// <summary>
-        /// Get all ratings for a specific book
+        /// Get all reviews for a specific book
         /// </summary>
         /// <param name="userId">The unique identifier for the user.</param>
         /// <param name="bookId">The unique identifier for the book.</param>
-        /// <returns>A list of ratings</returns>
+        /// <returns>A list of reviews</returns>
         [HttpGet("book/{bookId}")]
-        public async Task<ActionResult<IEnumerable<Rating>>> GetRatingsForBook(string userId, string bookId)
+        public async Task<ActionResult<IEnumerable<Review>>> GetReviewsForBook(string userId, string bookId)
         {
             try
             {
@@ -40,26 +40,26 @@ namespace BestReads.Controllers
                     return BadRequest($"Missing or invalid required parameter: {missing}");
                 }
 
-                var ratings = await _ratingRepository.GetRatingsByBookIdAsync(bookId);
-                return Ok(ratings);
+                var reviews = await _reviewRepository.GetReviewsByBookIdAsync(bookId);
+                return Ok(reviews);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Failed to retrieve ratings for book {bookId} for user {userId}");
-                return StatusCode(500, "An error occurred while retrieving ratings.");
+                _logger.LogError(ex, $"Failed to retrieve reviews for book {bookId} for user {userId}");
+                return StatusCode(500, "An error occurred while retrieving reviews.");
             }
         }
 
-        // POST: api/rating/{userId}/book/{bookId}
+        // POST: api/review/{userId}/book/{bookId}
         /// <summary>
-        /// Add a rating to a specific book
+        /// Add a review to a specific book
         /// </summary>
         /// <param name="userId">The unique identifier for the user.</param>
         /// <param name="bookId">The unique identifier for the book.</param>
-        /// <param name="newRating">The rating object to add.</param>
+        /// <param name="newReview">The review object to add.</param>
         /// <returns></returns>
         [HttpPost("book/{bookId}")]
-        public async Task<ActionResult> AddRatingToBook(string userId, string bookId, [FromBody] Rating newRating)
+        public async Task<ActionResult> AddReviewToBook(string userId, string bookId, [FromBody] Review newReview)
         {
             try
             {
@@ -67,9 +67,9 @@ namespace BestReads.Controllers
                 {
                     return BadRequest($"Missing or invalid required parameter: {missing}");
                 }
-                if (newRating == null || newRating.RatingValue < 1 || newRating.RatingValue > 5)
+                if (newReview == null || newReview.RatingValue < 1 || newReview.RatingValue > 5)
                 {
-                    return BadRequest("Invalid rating value. Rating must be between 1 and 5.");
+                    return BadRequest("Invalid review value. Review must be between 1 and 5.");
                 }
 
                 // Check if the book exists
@@ -79,27 +79,27 @@ namespace BestReads.Controllers
                     return NotFound($"Book with ID '{bookId}' does not exist.");
                 }
 
-                // Add the rating
-                await _ratingRepository.AddRatingToBookAsync(bookId, newRating);
+                // Add the review
+                await _reviewRepository.AddReviewToBookAsync(bookId, newReview);
                 return NoContent();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Failed to add rating to book {bookId} for user {userId}");
-                return StatusCode(500, "An error occurred while adding the rating.");
+                _logger.LogError(ex, $"Failed to add review to book {bookId} for user {userId}");
+                return StatusCode(500, "An error occurred while adding the review.");
             }
         }
 
-        // PUT: api/rating/{userId}/book/{bookId}
+        // PUT: api/review/{userId}/book/{bookId}
         /// <summary>
-        /// Update the rating of a specific user on a specific book
+        /// Update the review of a specific user on a specific book
         /// </summary>
         /// <param name="userId">The unique identifier for the user.</param>
         /// <param name="bookId">The unique identifier for the book.</param>
-        /// <param name="updatedRating">The updated rating object.</param>
+        /// <param name="updatedReview">The updated review object.</param>
         /// <returns></returns>
         [HttpPut("book/{bookId}")]
-        public async Task<ActionResult> UpdateUserRating(string userId, string bookId, [FromBody] Rating updatedRating)
+        public async Task<ActionResult> UpdateUserReview(string userId, string bookId, [FromBody] Review updatedReview)
         {
             try
             {
@@ -107,9 +107,9 @@ namespace BestReads.Controllers
                 {
                     return BadRequest($"Missing or invalid required parameter: {missing}");
                 }
-                if (updatedRating == null || updatedRating.RatingValue < 1 || updatedRating.RatingValue > 5)
+                if (updatedReview == null || updatedReview.RatingValue < 1 || updatedReview.RatingValue > 5)
                 {
-                    return BadRequest("Invalid rating value. Rating must be between 1 and 5.");
+                    return BadRequest("Invalid review value. Review must be between 1 and 5.");
                 }
 
                 // Check if the book exists
@@ -119,26 +119,26 @@ namespace BestReads.Controllers
                     return NotFound($"Book with ID '{bookId}' does not exist.");
                 }
 
-                // Update the rating
-                await _ratingRepository.UpdateUserRatingAsync(bookId, userId, updatedRating);
+                // Update the review
+                await _reviewRepository.UpdateUserReviewAsync(bookId, userId, updatedReview);
                 return NoContent();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Failed to update rating for book {bookId} by user {userId}");
-                return StatusCode(500, "An error occurred while updating the rating.");
+                _logger.LogError(ex, $"Failed to update review for book {bookId} by user {userId}");
+                return StatusCode(500, "An error occurred while updating the review.");
             }
         }
 
-        // DELETE: api/rating/{userId}/book/{bookId}
+        // DELETE: api/review/{userId}/book/{bookId}
         /// <summary>
-        /// Remove the rating of a specific user on a specific book
+        /// Remove the review of a specific user on a specific book
         /// </summary>
         /// <param name="userId">The unique identifier for the user.</param>
         /// <param name="bookId">The unique identifier for the book.</param>
         /// <returns></returns>
         [HttpDelete("book/{bookId}")]
-        public async Task<ActionResult> RemoveUserRating(string userId, string bookId)
+        public async Task<ActionResult> RemoveUserReview(string userId, string bookId)
         {
             try
             {
@@ -154,20 +154,20 @@ namespace BestReads.Controllers
                     return NotFound($"Book with ID '{bookId}' does not exist.");
                 }
 
-                // Remove the rating
-                await _ratingRepository.RemoveRatingFromBookAsync(bookId, userId);
+                // Remove the review
+                await _reviewRepository.RemoveReviewFromBookAsync(bookId, userId);
                 return NoContent();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Failed to remove rating for book {bookId} by user {userId}");
-                return StatusCode(500, "An error occurred while removing the rating.");
+                _logger.LogError(ex, $"Failed to remove review for book {bookId} by user {userId}");
+                return StatusCode(500, "An error occurred while removing the review.");
             }
         }
 
-        // GET: api/rating/{userId}/book/{bookId}/average
+        // GET: api/review/{userId}/book/{bookId}/average
         /// <summary>
-        /// Get the average rating for a specific book
+        /// Get the average review for a specific book
         /// </summary>
         /// <param name="userId">The unique identifier for the user.</param>
         /// <param name="bookId">The unique identifier for the book.</param>
@@ -182,18 +182,18 @@ namespace BestReads.Controllers
                     return BadRequest($"Missing or invalid required parameter: {missing}");
                 }
 
-                var avgRating = await _ratingRepository.GetAverageRatingForBookAsync(bookId);
+                var avgRating = await _reviewRepository.GetAverageRatingForBookAsync(bookId);
                 if (avgRating == null)
                 {
-                    return NotFound($"No ratings found for book {bookId}.");
+                    return NotFound($"No reviews found for book {bookId}.");
                 }
 
                 return Ok(avgRating);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Failed to retrieve average rating for book {bookId} for user {userId}");
-                return StatusCode(500, "An error occurred while retrieving the average rating.");
+                _logger.LogError(ex, $"Failed to retrieve average review for book {bookId} for user {userId}");
+                return StatusCode(500, "An error occurred while retrieving the average review.");
             }
         }
 

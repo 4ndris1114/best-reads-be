@@ -37,8 +37,8 @@ public class Book {
     [BsonElement("genres")]
     public List<string> Genres { get; set; } = new();
 
-    [BsonElement("ratings")]
-    public List<Rating> Ratings { get; set; } = new();
+    [BsonElement("reviews")]
+    public List<Review> Reviews { get; set; } = new();
 
     [BsonElement("averageRating")]
     [Range(0, 5)]
