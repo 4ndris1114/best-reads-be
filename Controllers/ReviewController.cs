@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace BestReads.Controllers
 {
     [ApiController]
-    [Route("api/[controller]/{userId}")]
+    [Route("api/[controller]/")]
     public class ReviewController : ControllerBase
     {
         private readonly ReviewRepository _reviewRepository;

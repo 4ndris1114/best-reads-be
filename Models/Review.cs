@@ -7,6 +7,9 @@ namespace BestReads.Models;
 public class Review {
     [BsonId]
     [BsonRepresentation(BsonType.ObjectId)]
+    public string? Id { get; set; }
+
+    [BsonElement("UserId")]
     public string? UserId { get; set; }
 
     [Range(1, 5)]
