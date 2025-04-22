@@ -17,7 +17,7 @@ namespace BestReads.Controllers;
 public class AuthController : ControllerBase {
     private readonly UserRepository _userRepository;
     private readonly ILogger<AuthController> _logger;
-        private readonly IConfiguration _configuration;
+    private readonly IConfiguration _configuration;
 
 
     public AuthController(UserRepository userRepository, ILogger<AuthController> logger, IConfiguration configuration) {

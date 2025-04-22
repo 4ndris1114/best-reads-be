@@ -33,6 +33,12 @@ public class UserController : ControllerBase
         }
     }
 
+/// <summary>
+/// Update a specific user
+/// </summary>
+/// <param name="id">The unique identifier for the user</param>
+/// <param name="user">The user object to update</param>
+/// <returns>A updated user object</returns>
     [HttpPut("{id}/edit")]
     public async Task<ActionResult<User>> EditUser(string id, User user) {
         try {
