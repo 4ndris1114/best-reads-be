@@ -29,7 +29,7 @@ namespace BestReads.Repositories {
         }
 
         // Add a review to a book
-        public async Task AddReviewToBookAsync(string bookId, Review newReview) {
+        public async Task PostReviewAsync(string bookId, Review newReview) {
             try {
                 var filter = Builders<Book>.Filter.Eq(b => b.Id, bookId);
                 var update = Builders<Book>.Update.Push(b => b.Reviews, newReview);
@@ -41,7 +41,7 @@ namespace BestReads.Repositories {
             }
         }
 
-        public async Task UpdateUserReviewAsync(string bookId, string reviewId, Review updatedReview) {
+        public async Task UpdateReviewAsync(string bookId, string reviewId, Review updatedReview) {
             try {
                 var filter = Builders<Book>.Filter.And(
                     Builders<Book>.Filter.Eq(b => b.Id, bookId),
@@ -61,18 +61,18 @@ namespace BestReads.Repositories {
             }
         }
 
-        // // Remove a review from a book
-        // public async Task RemoveReviewFromBookAsync(string bookId, string userId) {
-        //     try {
-        //         var filter = Builders<Book>.Filter.Eq(b => b.Id, bookId);
-        //         var update = Builders<Book>.Update.PullFilter(b => b.Reviews, r => r.UserId == userId);
+        // Remove a review from a book
+        public async Task DeleteReviewAsync(string reviewId, string bookId) {
+            try {
+                var filter = Builders<Book>.Filter.Eq(b => b.Id, bookId);
+                var update = Builders<Book>.Update.PullFilter(b => b.Reviews, r => r.Id == reviewId);
 
-        //         await _books.UpdateOneAsync(filter, update);
-        //     } catch (Exception ex) {
-        //         _logger.LogError(ex, $"Error removing review for user {userId} on book {bookId}");
-        //         throw;
-        //     }
-        // }
+                await _books.UpdateOneAsync(filter, update);
+            } catch (Exception ex) {
+                _logger.LogError(ex, $"Error removing review on book {bookId}");
+                throw;
+            }
+        }
 
         // Get the average review for a book
         public async Task<double?> GetAverageRatingForBookAsync(string bookId) {
