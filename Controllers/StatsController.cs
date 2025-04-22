@@ -13,10 +13,10 @@ public class StatsController : ControllerBase {
         _statsRepository = statsRepository;
         }
 
-    [HttpGet("{progressId}")]
-    public async Task<ActionResult<ReadingProgress>> GetReadingProgressById(string userId, string progressId) {
+    [HttpGet("{userId}")]
+    public async Task<ActionResult<ReadingProgress>> GetAllReadingProgressById(string userId) {
         try{
-            var readingProgress = await _statsRepository.GetReadingProgressAsync(userId);
+            var readingProgress = await _statsRepository.GetAllReadingProgressAsync(userId);
             if(readingProgress == null) 
                 return NotFound("Reading progress not found");
             return Ok(readingProgress);
