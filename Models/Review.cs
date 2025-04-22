@@ -18,6 +18,8 @@ public class Review {
     [MaxLength(1000)]
     public string ReviewText { get; set; } = string.Empty;
 
+    public bool isPublic { get; set; } = false;
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
