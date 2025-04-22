@@ -96,37 +96,37 @@ namespace BestReads.Controllers
         // /// <param name="bookId">The unique identifier for the book.</param>
         // /// <param name="updatedReview">The updated review object.</param>
         // /// <returns></returns>
-        // [HttpPut("book/{bookId}")]
-        // public async Task<ActionResult> UpdateUserReview(string bookId, [FromBody] Review updatedReview)
-        // {
-        //     try
-        //     {
-        //         if (!ValidateInputs(out var missing, (bookId, "bookId")))
-        //         {
-        //             return BadRequest($"Missing or invalid required parameter: {missing}");
-        //         }
-        //         if (updatedReview == null || updatedReview.RatingValue < 1 || updatedReview.RatingValue > 5)
-        //         {
-        //             return BadRequest("Invalid review value. Review must be between 1 and 5.");
-        //         }
+        [HttpPut("{reviewId}/book/{bookId}")]
+        public async Task<ActionResult> UpdateUserReview(string reviewId, string bookId, [FromBody] Review updatedReview)
+        {
+            try
+            {
+                if (!ValidateInputs(out var missing, (bookId, "bookId"),(reviewId, "reviewId")))
+                {
+                    return BadRequest($"Missing or invalid required parameter: {missing}");
+                }
+                if (updatedReview == null || updatedReview.RatingValue < 1 || updatedReview.RatingValue > 5)
+                {
+                    return BadRequest("Invalid review value. Review must be between 1 and 5.");
+                }
 
-        //         // Check if the book exists
-        //         var book = await _bookRepository.GetByIdAsync(bookId);
-        //         if (book == null)
-        //         {
-        //             return NotFound($"Book with ID '{bookId}' does not exist.");
-        //         }
+                // Check if the book exists
+                var book = await _bookRepository.GetByIdAsync(bookId);
+                if (book == null)
+                {
+                    return NotFound($"Book with ID '{bookId}' does not exist.");
+                }
 
-        //         // Update the review
-        //         await _reviewRepository.UpdateUserReviewAsync(bookId, updatedReview);
-        //         return NoContent();
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         _logger.LogError(ex, $"Failed to update review for book {bookId}");
-        //         return StatusCode(500, "An error occurred while updating the review.");
-        //     }
-        // }
+                // Update the review
+                await _reviewRepository.UpdateUserReviewAsync(bookId, reviewId, updatedReview);
+                return Ok(updatedReview);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Failed to update review for book {bookId}");
+                return StatusCode(500, "An error occurred while updating the review.");
+            }
+        }
 
         // // DELETE: api/review/book/{bookId}
         // /// <summary>

@@ -41,22 +41,25 @@ namespace BestReads.Repositories {
             }
         }
 
-        // // Update the review of a specific user on a book
-        // public async Task UpdateUserReviewAsync(string bookId, string userId, Review updatedReview) {
-        //     try {
-        //         var filter = Builders<Book>.Filter.And(
-        //             Builders<Book>.Filter.Eq(b => b.Id, bookId),
-        //             Builders<Book>.Filter.ElemMatch(b => b.Reviews, r => r.UserId == userId)
-        //         );
+        public async Task UpdateUserReviewAsync(string bookId, string reviewId, Review updatedReview) {
+            try {
+                var filter = Builders<Book>.Filter.And(
+                    Builders<Book>.Filter.Eq(b => b.Id, bookId),
+                    Builders<Book>.Filter.ElemMatch(b => b.Reviews, r => r.Id == reviewId)
+                );
 
-        //         var update = Builders<Book>.Update.Set("reviews.$.rating", updatedReview.RatingValue); // Update specific user's rating
+                var update = Builders<Book>.Update
+                    .Set("Reviews.$.RatingValue", updatedReview.RatingValue)
+                    .Set("Reviews.$.ReviewText", updatedReview.ReviewText)
+                    .Set("Reviews.$.isPublic", updatedReview.isPublic)
+                    .Set("Reviews.$.UpdatedAt", DateTime.UtcNow);
 
-        //         await _books.UpdateOneAsync(filter, update);
-        //     } catch (Exception ex) {
-        //         _logger.LogError(ex, $"Error updating rating for user {userId} on book {bookId}");
-        //         throw;
-        //     }
-        // }
+                await _books.UpdateOneAsync(filter, update);
+            } catch (Exception ex) {
+                _logger.LogError(ex, $"Error updating review {reviewId} on book {bookId}");
+                throw;
+            }
+        }
 
         // // Remove a review from a book
         // public async Task RemoveReviewFromBookAsync(string bookId, string userId) {
