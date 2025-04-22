@@ -40,12 +40,8 @@ public class UserController : ControllerBase
 /// <param name="user">The user object to update</param>
 /// <returns>A updated user object</returns>
     [HttpPut("{id}/edit")]
-    public async Task<ActionResult<User>> EditUser(string id, User user) {
+    public async Task<ActionResult<User>> EditUser(string id, UpdateUserDTO user) {
         try {
-            var userById = await _userRepository.GetByIdAsync(id);
-            if (userById != null) {
-                user.Password = userById.Password;
-            }
             var updatedUser = await _userRepository.EditUserAsync(id, user);
             if (updatedUser == null)
                 return NotFound("User not found");

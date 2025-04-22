@@ -6,13 +6,24 @@ using System.Text.Json.Serialization;
 namespace BestReads.Models;
 
 public class ReadingProgress {
+
     [BsonId]
     [BsonRepresentation(BsonType.ObjectId)]
+    public string? Id { get; set; }
+
+    [BsonElement("bookId")]
     public string? BookId { get; set; }
 
-    [BsonElement("progress")]
-    [Range(0, 100, ErrorMessage = "Progress must be between 0 and 100")]
     public int Progress { get; set; }
+
+    [BsonElement("currentPage")]
+    [Range(0, int.MaxValue, ErrorMessage = "Current page must not be negative")]
+    public int CurrentPage { get; set; }
+
+
+    [BsonElement("totalPages")]
+    [Range(0, int.MaxValue, ErrorMessage = "Total pages must not be negative")]
+    public int TotalPages { get; set; }
 
     [BsonElement("updatedAt")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
