@@ -211,7 +211,7 @@ public class BookshelfController : ControllerBase
             }
 
             var bookshelf = await _bookshelfRepository.GetBookshelfByIdAsync(userId, shelfId);
-            if (bookshelf.Books != null && bookshelf.Books.Contains(bookId)) {
+            if (bookshelf?.Books != null && bookshelf.Books.Contains(bookId)) {
                 return BadRequest($"Book with ID '{bookId}' is already in the bookshelf.");
             }
 

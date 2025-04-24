@@ -6,78 +6,81 @@ using Microsoft.Extensions.Logging;
 
 namespace BestReads.Repositories {
 
-    public class RatingRepository {
+    public class ReviewRepository {
         private readonly IMongoCollection<Book> _books;  // Access the books collection
-        private readonly ILogger<RatingRepository> _logger;
+        private readonly ILogger<ReviewRepository> _logger;
 
-        public RatingRepository(MongoDbContext dbContext, ILogger<RatingRepository> logger) {
+        public ReviewRepository(MongoDbContext dbContext, ILogger<ReviewRepository> logger) {
             _logger = logger;
             _books = dbContext.Database.GetCollection<Book>("books");  // Use "books" collection
         }
 
-        // Get all ratings for a book by bookId
-        public async Task<List<Rating>> GetRatingsByBookIdAsync(string bookId) {
+        // Get all reviews for a book by bookId
+        public async Task<List<Review>> GetReviewsByBookIdAsync(string bookId) {
             try {
                 var filter = Builders<Book>.Filter.Eq(b => b.Id, bookId);
                 var book = await _books.Find(filter).FirstOrDefaultAsync();
 
-                return book?.Ratings ?? new List<Rating>();  // Return ratings if book exists
+                return book?.Reviews ?? new List<Review>();  // Return reviews if book exists
             } catch (Exception ex) {
-                _logger.LogError(ex, $"Error getting ratings for book with id {bookId}");
+                _logger.LogError(ex, $"Error getting reviews for book with id {bookId}");
                 throw;
             }
         }
 
-        // Add a rating to a book
-        public async Task AddRatingToBookAsync(string bookId, Rating newRating) {
+        // Add a review to a book
+        public async Task PostReviewAsync(string bookId, Review newReview) {
             try {
                 var filter = Builders<Book>.Filter.Eq(b => b.Id, bookId);
-                var update = Builders<Book>.Update.Push(b => b.Ratings, newRating);
+                var update = Builders<Book>.Update.Push(b => b.Reviews, newReview);
 
                 await _books.UpdateOneAsync(filter, update);
             } catch (Exception ex) {
-                _logger.LogError(ex, $"Error adding rating to book with id {bookId}");
+                _logger.LogError(ex, $"Error adding review to book with id {bookId}");
                 throw;
             }
         }
 
-        // Update the rating of a specific user on a book
-        public async Task UpdateUserRatingAsync(string bookId, string userId, Rating updatedRating) {
+        public async Task UpdateReviewAsync(string bookId, string reviewId, Review updatedReview) {
             try {
                 var filter = Builders<Book>.Filter.And(
                     Builders<Book>.Filter.Eq(b => b.Id, bookId),
-                    Builders<Book>.Filter.ElemMatch(b => b.Ratings, r => r.UserId == userId)
+                    Builders<Book>.Filter.ElemMatch(b => b.Reviews, r => r.Id == reviewId)
                 );
 
-                var update = Builders<Book>.Update.Set("ratings.$.rating", updatedRating.RatingValue); // Update specific user's rating
+                var update = Builders<Book>.Update
+                    .Set("Reviews.$.RatingValue", updatedReview.RatingValue)
+                    .Set("Reviews.$.ReviewText", updatedReview.ReviewText)
+                    .Set("Reviews.$.isPublic", updatedReview.isPublic)
+                    .Set("Reviews.$.UpdatedAt", DateTime.UtcNow);
 
                 await _books.UpdateOneAsync(filter, update);
             } catch (Exception ex) {
-                _logger.LogError(ex, $"Error updating rating for user {userId} on book {bookId}");
+                _logger.LogError(ex, $"Error updating review {reviewId} on book {bookId}");
                 throw;
             }
         }
 
-        // Remove a rating from a book
-        public async Task RemoveRatingFromBookAsync(string bookId, string userId) {
+        // Remove a review from a book
+        public async Task DeleteReviewAsync(string reviewId, string bookId) {
             try {
                 var filter = Builders<Book>.Filter.Eq(b => b.Id, bookId);
-                var update = Builders<Book>.Update.PullFilter(b => b.Ratings, r => r.UserId == userId);
+                var update = Builders<Book>.Update.PullFilter(b => b.Reviews, r => r.Id == reviewId);
 
                 await _books.UpdateOneAsync(filter, update);
             } catch (Exception ex) {
-                _logger.LogError(ex, $"Error removing rating for user {userId} on book {bookId}");
+                _logger.LogError(ex, $"Error removing review on book {bookId}");
                 throw;
             }
         }
 
-        // Get the average rating for a book
+        // Get the average review for a book
         public async Task<double?> GetAverageRatingForBookAsync(string bookId) {
             try {
                 var filter = Builders<Book>.Filter.Eq(b => b.Id, bookId);
                 var book = await _books.Find(filter).FirstOrDefaultAsync();
 
-                return book?.AverageRating;  // Return the average rating if book exists
+                return book?.AverageRating;  // Return the average review if book exists
             } catch (Exception ex) {
                 _logger.LogError(ex, $"Error getting average rating for book {bookId}");
                 throw;
