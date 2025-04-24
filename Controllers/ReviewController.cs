@@ -30,7 +30,7 @@ namespace BestReads.Controllers
         /// <param name="bookId">The unique identifier for the book.</param>
         /// <returns>A list of reviews</returns>
         [HttpGet("book/{bookId}")]
-        public async Task<ActionResult<IEnumerable<Review>>> GetReviewsForBook(string bookId)
+        public async Task<ActionResult<IEnumerable<Review>>> GetReviewsByBookId(string bookId)
         {
             try
             {
@@ -57,7 +57,7 @@ namespace BestReads.Controllers
         /// <param name="newReview">The review object to add.</param>
         /// <returns></returns>
         [HttpPost("book/{bookId}")]
-        public async Task<ActionResult> AddReviewToBook(string bookId, [FromBody] Review newReview)
+        public async Task<ActionResult> PostReview(string bookId, [FromBody] Review newReview)
         {
             try
             {
@@ -79,8 +79,8 @@ namespace BestReads.Controllers
 
                 // Add the review
                 newReview.Id = ObjectId.GenerateNewId().ToString();
-                await _reviewRepository.AddReviewToBookAsync(bookId, newReview);
-                return CreatedAtAction(nameof(GetReviewsForBook), new { bookId }, newReview);
+                await _reviewRepository.PostReviewAsync(bookId, newReview);
+                return CreatedAtAction(nameof(GetReviewsByBookId), new { bookId }, newReview);
             }
             catch (Exception ex)
             {
@@ -96,71 +96,72 @@ namespace BestReads.Controllers
         // /// <param name="bookId">The unique identifier for the book.</param>
         // /// <param name="updatedReview">The updated review object.</param>
         // /// <returns></returns>
-        // [HttpPut("book/{bookId}")]
-        // public async Task<ActionResult> UpdateUserReview(string bookId, [FromBody] Review updatedReview)
-        // {
-        //     try
-        //     {
-        //         if (!ValidateInputs(out var missing, (bookId, "bookId")))
-        //         {
-        //             return BadRequest($"Missing or invalid required parameter: {missing}");
-        //         }
-        //         if (updatedReview == null || updatedReview.RatingValue < 1 || updatedReview.RatingValue > 5)
-        //         {
-        //             return BadRequest("Invalid review value. Review must be between 1 and 5.");
-        //         }
+        [HttpPut("{reviewId}/book/{bookId}")]
+        public async Task<ActionResult> UpdateReview(string reviewId, string bookId, [FromBody] Review updatedReview)
+        {
+            try
+            {
+                if (!ValidateInputs(out var missing, (bookId, "bookId"),(reviewId, "reviewId")))
+                {
+                    return BadRequest($"Missing or invalid required parameter: {missing}");
+                }
+                if (updatedReview == null || updatedReview.RatingValue < 1 || updatedReview.RatingValue > 5)
+                {
+                    return BadRequest("Invalid review value. Review must be between 1 and 5.");
+                }
 
-        //         // Check if the book exists
-        //         var book = await _bookRepository.GetByIdAsync(bookId);
-        //         if (book == null)
-        //         {
-        //             return NotFound($"Book with ID '{bookId}' does not exist.");
-        //         }
+                // Check if the book exists
+                var book = await _bookRepository.GetByIdAsync(bookId);
+                if (book == null)
+                {
+                    return NotFound($"Book with ID '{bookId}' does not exist.");
+                }
 
-        //         // Update the review
-        //         await _reviewRepository.UpdateUserReviewAsync(bookId, updatedReview);
-        //         return NoContent();
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         _logger.LogError(ex, $"Failed to update review for book {bookId}");
-        //         return StatusCode(500, "An error occurred while updating the review.");
-        //     }
-        // }
+                // Update the review
+                await _reviewRepository.UpdateReviewAsync(bookId, reviewId, updatedReview);
+                return Ok(updatedReview);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Failed to update review for book {bookId}");
+                return StatusCode(500, "An error occurred while updating the review.");
+            }
+        }
 
-        // // DELETE: api/review/book/{bookId}
-        // /// <summary>
-        // /// Remove the review of a specific user on a specific book
-        // /// </summary>
-        // /// <param name="bookId">The unique identifier for the book.</param>
-        // /// <returns></returns>
-        // [HttpDelete("book/{bookId}")]
-        // public async Task<ActionResult> RemoveUserReview(string bookId)
-        // {
-        //     try
-        //     {
-        //         if (!ValidateInputs(out var missing, (bookId, "bookId")))
-        //         {
-        //             return BadRequest($"Missing or invalid required parameter: {missing}");
-        //         }
+        // DELETE: api/review/{reviewId}/book/{bookId}
+        /// <summary>
+        /// Remove the review of a specific book
+        /// </summary>
+        /// <param name="bookId">The unique identifier for the book.</param>
+        /// <param name="reviewId">The unique identifier for the review.</param>
+        /// <returns></returns>
+        [HttpDelete("{reviewId}/book/{bookId}")]
+        public async Task<ActionResult> DeleteReview(string reviewId, string bookId)
+        {
+            try
+            {
+                if (!ValidateInputs(out var missing, (bookId, "bookId"), (reviewId, "reviewId")))
+                {
+                    return BadRequest($"Missing or invalid required parameter: {missing}");
+                }
 
-        //         // Check if the book exists
-        //         var book = await _bookRepository.GetByIdAsync(bookId);
-        //         if (book == null)
-        //         {
-        //             return NotFound($"Book with ID '{bookId}' does not exist.");
-        //         }
+                // Check if the book exists
+                var book = await _bookRepository.GetByIdAsync(bookId);
+                if (book == null)
+                {
+                    return NotFound($"Book with ID '{bookId}' does not exist.");
+                }
 
-        //         // Remove the review
-        //         await _reviewRepository.RemoveReviewFromBookAsync(bookId);
-        //         return NoContent();
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         _logger.LogError(ex, $"Failed to remove review for book {bookId}");
-        //         return StatusCode(500, "An error occurred while removing the review.");
-        //     }
-        // }
+                // Remove the review
+                await _reviewRepository.DeleteReviewAsync(reviewId, bookId);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Failed to remove review for book {bookId}");
+                return StatusCode(500, "An error occurred while removing the review.");
+            }
+        }
 
         // GET: api/review/book/{bookId}/average
         /// <summary>
