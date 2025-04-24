@@ -64,4 +64,17 @@ public class UserController : ControllerBase
             return StatusCode(500, "Couldn't follow user");
         }
     }
+
+    [HttpDelete("{id}/unfollow/{friendId}")]
+    public async Task<ActionResult<User>> UnfollowUser(string id, string friendId) {
+        try {
+            var updatedUser = await _userRepository.UnfollowUserAsync(id, friendId);
+            if (updatedUser == null)
+                return NotFound("User or friend not found");
+            return Ok(updatedUser);
+        } catch (Exception ex) {
+            _logger.LogError(ex, $"Error unfollowing user with id {id}");
+            return StatusCode(500, "Couldn't unfollow user");
+        }
+    }
 }
