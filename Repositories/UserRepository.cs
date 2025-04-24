@@ -1,6 +1,7 @@
 using BestReads.Models;
 using BestReads.Database;
 using MongoDB.Driver;
+using MongoDB.Bson;
 
 namespace BestReads.Repositories;
 public class UserRepository : BaseRepository<User> {
@@ -65,7 +66,7 @@ public class UserRepository : BaseRepository<User> {
             await session.CommitTransactionAsync();
 
             // Optional: return the updated user
-            return await _users.Find(u => u.Id == userId).FirstOrDefaultAsync();
+            return await _users.Find(u => u.Id == friendId).FirstOrDefaultAsync();
         }
         catch (Exception ex) {
             await session.AbortTransactionAsync();
@@ -99,11 +100,17 @@ public class UserRepository : BaseRepository<User> {
             await session.CommitTransactionAsync();
 
             // Optional: return the updated user
-            return await _users.Find(u => u.Id == userId).FirstOrDefaultAsync();
+            return await _users.Find(u => u.Id == friendId).FirstOrDefaultAsync();
         }
         catch (Exception ex) {
             await session.AbortTransactionAsync();
             throw new Exception("Transaction failed while unfollowing user", ex);
         }
+    }
+
+    public async Task<List<User>> SearchUsersByUsernameAsync(string query)
+    {
+        var filter = Builders<User>.Filter.Regex(u => u.Username, new BsonRegularExpression(query, "i")); // case-insensitive
+        return await _users.Find(filter).Limit(10).ToListAsync();
     }
 }
