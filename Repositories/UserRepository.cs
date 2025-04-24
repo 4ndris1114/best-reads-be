@@ -23,7 +23,8 @@ public class UserRepository : BaseRepository<User> {
                 .Set(u => u.Username, user.Username)
                 .Set(u => u.Email, user.Email)
                 .Set(u => u.Bio, user.Bio)
-                .Set(u => u.ProfilePicture, user.ProfilePicture);
+                .Set(u => u.ProfilePicture, user.ProfilePicture)
+                .Set(u => u.Following, user.Following);
             var options = new FindOneAndUpdateOptions<User>
             {
                 ReturnDocument = ReturnDocument.After
@@ -37,5 +38,17 @@ public class UserRepository : BaseRepository<User> {
 
     public async Task<User?> GetByUsernameAsync(string username) {
         return await _users.Find(u => u.Username == username).FirstOrDefaultAsync();
+    }
+
+    public async Task<User?> FollowUserAsync(string userId, string friendId) {
+        var user = await GetByIdAsync(userId);
+        var friend = await GetByIdAsync(friendId);
+
+        if (user == null || friend == null) return null;
+
+        if (user.Following.Contains(friendId)) return user; // Already following
+
+        user.Following.Add(friendId);
+        return await UpdateAsync(userId, user); // Could reuse underlying Mongo update logic
     }
 }

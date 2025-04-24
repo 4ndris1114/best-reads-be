@@ -51,4 +51,17 @@ public class UserController : ControllerBase
             return StatusCode(500, $"Couldn't update user with id {id}");
         }
     }
+
+    [HttpPost("{id}/follow/{friendId}")]
+    public async Task<ActionResult<User>> FollowUser(string id, string friendId) {
+        try {
+            var updatedUser = await _userRepository.FollowUserAsync(id, friendId);
+            if (updatedUser == null)
+                return NotFound("User or friend not found");
+            return Ok(updatedUser);
+        } catch (Exception ex) {
+            _logger.LogError(ex, $"Error following user with id {id}");
+            return StatusCode(500, "Couldn't follow user");
+        }
+    }
 }
