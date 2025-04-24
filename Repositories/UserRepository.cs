@@ -23,8 +23,7 @@ public class UserRepository : BaseRepository<User> {
                 .Set(u => u.Username, user.Username)
                 .Set(u => u.Email, user.Email)
                 .Set(u => u.Bio, user.Bio)
-                .Set(u => u.ProfilePicture, user.ProfilePicture)
-                .Set(u => u.Following, user.Following);
+                .Set(u => u.ProfilePicture, user.ProfilePicture);
             var options = new FindOneAndUpdateOptions<User>
             {
                 ReturnDocument = ReturnDocument.After
@@ -41,14 +40,36 @@ public class UserRepository : BaseRepository<User> {
     }
 
     public async Task<User?> FollowUserAsync(string userId, string friendId) {
-        var user = await GetByIdAsync(userId);
-        var friend = await GetByIdAsync(friendId);
+        using var session = await _users.Database.Client.StartSessionAsync();
 
-        if (user == null || friend == null) return null;
+        session.StartTransaction();
 
-        if (user.Following.Contains(friendId)) return user; // Already following
+        try {
+            var user = await _users.Find(session, u => u.Id == userId).FirstOrDefaultAsync();
+            var friend = await _users.Find(session, u => u.Id == friendId).FirstOrDefaultAsync();
 
-        user.Following.Add(friendId);
-        return await UpdateAsync(userId, user); // Could reuse underlying Mongo update logic
+            if (user == null || friend == null) {
+                await session.AbortTransactionAsync();
+                return null;
+            }
+
+            var userUpdate = Builders<User>.Update.AddToSet(u => u.Following, friendId);
+            var friendUpdate = Builders<User>.Update.AddToSet(u => u.Followers, userId);
+
+            var userFilter = Builders<User>.Filter.Eq(u => u.Id, userId);
+            var friendFilter = Builders<User>.Filter.Eq(u => u.Id, friendId);
+
+            await _users.UpdateOneAsync(session, userFilter, userUpdate);
+            await _users.UpdateOneAsync(session, friendFilter, friendUpdate);
+
+            await session.CommitTransactionAsync();
+
+            // Optional: return the updated user
+            return await _users.Find(u => u.Id == userId).FirstOrDefaultAsync();
+        }
+        catch (Exception ex) {
+            await session.AbortTransactionAsync();
+            throw new Exception("Transaction failed while following user", ex);
+        }
     }
 }
