@@ -22,7 +22,8 @@ public class Book {
 
     [BsonElement("numberOfPages")]
     public int NumberOfPages { get; set; }
-    
+
+  
     [BsonElement("author")]
     [StringLength(100, MinimumLength = 1)]
     public string Author { get; set; } = string.Empty;
