@@ -13,7 +13,7 @@ public class Activity {
     public ObjectId UserId { get; set; }
 
     [BsonElement("type")]
-    public ActivityType Type { get; set; } = string.Empty;
+    public ActivityType Type { get; set; }
 
     [BsonElement("bookId")]
     public ObjectId BookId { get; set; }
