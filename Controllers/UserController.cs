@@ -34,6 +34,22 @@ public class UserController : ControllerBase
     }
 
 /// <summary>
+/// Get multiple users by their ids
+/// </summary>
+/// <param name="ids">A comma-separated list of user ids</param>
+/// <returns>A list of user objects</returns>
+    [HttpGet("batch")]
+    public async Task<IActionResult> GetUsersByIds([FromQuery] string ids) {
+        if (string.IsNullOrEmpty(ids))
+            return BadRequest("Ids query parameter is required.");
+
+        var idList = ids.Split(',');
+        var users = await _userRepository.GetUsersByIdsAsync(idList);
+
+        return Ok(users);
+    }
+
+/// <summary>
 /// Update a specific user
 /// </summary>
 /// <param name="id">The unique identifier for the user</param>

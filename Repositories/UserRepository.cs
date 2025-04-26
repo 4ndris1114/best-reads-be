@@ -36,6 +36,21 @@ public class UserRepository : BaseRepository<User> {
         }
     }
 
+    public async Task<List<UserSummaryDto>> GetUsersByIdsAsync(IEnumerable<string> ids) {
+        var filter = Builders<User>.Filter.In(u => u.Id, ids);
+        var projection = Builders<User>.Projection.Expression(u => new UserSummaryDto {
+            Id = u.Id,
+            Username = u.Username,
+            ProfilePicture = u.ProfilePicture
+        });
+
+        var result = await _users.Find(filter)
+                                            .Project(projection)
+                                            .ToListAsync();
+
+        return result;
+    }
+
     public async Task<User?> GetByUsernameAsync(string username) {
         return await _users.Find(u => u.Username == username).FirstOrDefaultAsync();
     }
