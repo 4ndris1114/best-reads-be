@@ -108,7 +108,8 @@ public class UserController : ControllerBase
         var result = users.Select(u => new {
             u.Id,
             u.Username,
-            u.ProfilePicture
+            u.ProfilePicture,
+            u.Bio
         });
 
         return Ok(result);
