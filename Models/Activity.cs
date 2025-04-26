@@ -13,19 +13,18 @@ public class Activity {
     public ObjectId UserId { get; set; }
 
     [BsonElement("type")]
-    public string Type { get; set; } = string.Empty; // "review", "rating", "shelf_update", "progress_update"
+    public ActivityType Type { get; set; } = string.Empty;
 
     [BsonElement("bookId")]
     public ObjectId BookId { get; set; }
 
-    [BsonElement("content")]
-    
-    [MaxLength(1000)]
-    public string Content { get; set; } = string.Empty; // Review text, rating, or update message
-
     [BsonElement("createdAt")]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    [BsonElement("updatedAt")]
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    public object Payload { get; set; }
+
+    public enum ActivityType {
+        AddedBookToShelf,
+        RatedBook
+    }
 }
