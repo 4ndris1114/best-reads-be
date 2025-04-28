@@ -10,13 +10,10 @@ public class Activity {
     public string? Id { get; set; }
 
     [BsonElement("userId")]
-    public ObjectId UserId { get; set; }
+    public string? UserId { get; set; }
 
     [BsonElement("type")]
     public ActivityType Type { get; set; }
-
-    [BsonElement("bookId")]
-    public ObjectId BookId { get; set; }
 
     [BsonElement("createdAt")]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
