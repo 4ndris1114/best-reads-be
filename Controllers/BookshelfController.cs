@@ -1,5 +1,6 @@
 using BestReads.Models;
 using BestReads.Repositories;
+using BestReads.Services;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using System.Linq;
@@ -12,13 +13,15 @@ public class BookshelfController : ControllerBase
 {
     private readonly BookshelfRepository _bookshelfRepository;
     private readonly BookRepository _bookRepository;
+    private readonly ActivityService _activityService;
 
     private readonly ILogger<BookshelfController> _logger;
 
-    public BookshelfController(BookshelfRepository bookshelfRepository, BookRepository bookRepository, ILogger<BookshelfController> logger)
+    public BookshelfController(BookshelfRepository bookshelfRepository, BookRepository bookRepository, ActivityService activityService, ILogger<BookshelfController> logger)
     {
         _bookshelfRepository = bookshelfRepository;
         _bookRepository = bookRepository;
+        _activityService = activityService;
         _logger = logger;
     }
 
@@ -215,7 +218,11 @@ public class BookshelfController : ControllerBase
                 return BadRequest($"Book with ID '{bookId}' is already in the bookshelf.");
             }
 
-            await _bookshelfRepository.AddBookToBookshelfAsync(userId, shelfId, bookId);
+            var result = await _bookshelfRepository.AddBookToBookshelfAsync(userId, shelfId, bookId);
+            
+            if (result) {
+                await _activityService.LogBookAddedToShelfAsync(userId, bookId, book.Title, book.CoverImage, bookshelf.Name);
+            }
             return Ok(bookId);
         } catch (Exception ex) {
             _logger.LogError(ex, $"Failed to add book {bookId} to shelf {shelfId} for user {userId}");
