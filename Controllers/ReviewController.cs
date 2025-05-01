@@ -1,5 +1,6 @@
 using BestReads.Models;
 using BestReads.Repositories;
+using BestReads.Services;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using System.Collections.Generic;
@@ -14,12 +15,14 @@ namespace BestReads.Controllers
     {
         private readonly ReviewRepository _reviewRepository;
         private readonly BookRepository _bookRepository;
+        private readonly ActivityService _activityService;
         private readonly ILogger<ReviewController> _logger;
 
-        public ReviewController(ReviewRepository reviewRepository, BookRepository bookRepository, ILogger<ReviewController> logger)
+        public ReviewController(ReviewRepository reviewRepository, BookRepository bookRepository, ActivityService activityService, ILogger<ReviewController> logger)
         {
             _reviewRepository = reviewRepository;
             _bookRepository = bookRepository;
+            _activityService = activityService;
             _logger = logger;
         }
 
@@ -79,7 +82,11 @@ namespace BestReads.Controllers
 
                 // Add the review
                 newReview.Id = ObjectId.GenerateNewId().ToString();
-                await _reviewRepository.PostReviewAsync(bookId, newReview);
+                var result = await _reviewRepository.PostReviewAsync(bookId, newReview);
+
+                if (result) {
+                    await _activityService.LogBookReviewedAsync(newReview.UserId, bookId, book.Title, book.CoverImage, newReview.RatingValue, newReview.ReviewText, false);
+                }
                 return CreatedAtAction(nameof(GetReviewsByBookId), new { bookId }, newReview);
             }
             catch (Exception ex)
@@ -118,7 +125,11 @@ namespace BestReads.Controllers
                 }
 
                 // Update the review
-                await _reviewRepository.UpdateReviewAsync(bookId, reviewId, updatedReview);
+                var result = await _reviewRepository.UpdateReviewAsync(bookId, reviewId, updatedReview);
+
+                if (result) {
+                    await _activityService.LogBookReviewedAsync(updatedReview.UserId, bookId, book.Title, book.CoverImage, updatedReview.RatingValue, updatedReview.ReviewText, true);
+                }
                 return Ok(updatedReview);
             }
             catch (Exception ex)

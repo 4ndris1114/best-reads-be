@@ -30,15 +30,18 @@ public class ActivityService {
         await _activityRepository.AddActivityAsync(activity);
     }
 
-    public async Task LogBookReviewedAsync(string userId, string bookId, int rating, string? reviewText) {
+    public async Task LogBookReviewedAsync(string userId, string bookId, string bookTitle, string coverImage, double rating, string? reviewText, bool isUpdate) {
         var activity = new Activity {
             UserId = userId,
             Type = Activity.ActivityType.RatedBook,
             CreatedAt = DateTime.UtcNow,
             Payload = new {
                 BookId = bookId,
+                BookTitle = bookTitle,
+                CoverImage = coverImage,
                 Rating = rating,
-                ReviewText = reviewText
+                ReviewText = reviewText,
+                IsUpdate = isUpdate
             }
         };
 
