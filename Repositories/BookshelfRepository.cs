@@ -127,7 +127,7 @@ public class BookshelfRepository {
     }
 
     // Move a book from one shelf to another
-    public async Task MoveBookToAnotherBookshelfAsync(string userId, string fromShelfId, string bookId, string toShelfId) {
+    public async Task<bool> MoveBookToAnotherBookshelfAsync(string userId, string fromShelfId, string bookId, string toShelfId) {
         try {
             using (var session = await _users.Database.Client.StartSessionAsync()) {
                 session.StartTransaction();
@@ -137,6 +137,7 @@ public class BookshelfRepository {
                     await AddBookToBookshelfAsync(userId, toShelfId, bookId, session);
 
                     await session.CommitTransactionAsync();
+                    return true;
                 } catch (Exception) {
                     await session.AbortTransactionAsync();
                     throw;

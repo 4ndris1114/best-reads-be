@@ -84,7 +84,7 @@ namespace BestReads.Controllers
                 newReview.Id = ObjectId.GenerateNewId().ToString();
                 var result = await _reviewRepository.PostReviewAsync(bookId, newReview);
 
-                if (result) {
+                if (result && newReview.IsPublic) {
                     await _activityService.LogBookReviewedAsync(newReview.UserId, bookId, book.Title, book.CoverImage, newReview.RatingValue, newReview.ReviewText, false);
                 }
                 return CreatedAtAction(nameof(GetReviewsByBookId), new { bookId }, newReview);
@@ -127,7 +127,7 @@ namespace BestReads.Controllers
                 // Update the review
                 var result = await _reviewRepository.UpdateReviewAsync(bookId, reviewId, updatedReview);
 
-                if (result) {
+                if (result && updatedReview.IsPublic) {
                     await _activityService.LogBookReviewedAsync(updatedReview.UserId, bookId, book.Title, book.CoverImage, updatedReview.RatingValue, updatedReview.ReviewText, true);
                 }
                 //return updated review and activityId (null if not updated)

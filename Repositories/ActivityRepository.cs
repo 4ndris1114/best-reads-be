@@ -48,30 +48,51 @@ public class ActivityRepository : BaseRepository<Activity>{
         }
     }
 
-public async Task<string?> UpdateActivityAsync(string id, Activity activity)
-{
-    var filter = Builders<Activity>.Filter.Eq(a => a.Id, id);
+    public async Task<string?> UpdateReviewActivityAsync(string id, Activity activity) {
+        var filter = Builders<Activity>.Filter.Eq(a => a.Id, id);
 
-    if (activity.Type == Activity.ActivityType.RatedBook)
-    {
-        // Deserialize Payload into expected type
-        var json = JsonConvert.SerializeObject(activity.Payload);
-        var reviewPayload = JsonConvert.DeserializeObject<ReviewPayload>(json);
+        if (activity.Type == Activity.ActivityType.RatedBook) {
+            // Deserialize Payload into expected type
+            var json = JsonConvert.SerializeObject(activity.Payload);
+            var reviewPayload = JsonConvert.DeserializeObject<ReviewPayload>(json);
 
-        if (reviewPayload == null)
-            throw new Exception("Invalid payload for RatedBook");
+            if (reviewPayload == null)
+                throw new Exception("Invalid payload for RatedBook");
 
-        var update = Builders<Activity>.Update
-            .Set("Payload.Rating", reviewPayload.Rating)
-            .Set("Payload.ReviewText", reviewPayload.ReviewText)
-            .Set("Payload.IsUpdate", reviewPayload.IsUpdate)
-            .Set(a => a.UpdatedAt, DateTime.UtcNow);
+            var update = Builders<Activity>.Update
+                .Set("Payload.Rating", reviewPayload.Rating)
+                .Set("Payload.ReviewText", reviewPayload.ReviewText)
+                .Set("Payload.IsUpdate", reviewPayload.IsUpdate)
+                .Set(a => a.UpdatedAt, DateTime.UtcNow);
 
-        var result = await getCollection().UpdateOneAsync(filter, update);
-        return result.ModifiedCount > 0 ? id : null;
+            var result = await getCollection().UpdateOneAsync(filter, update);
+            return result.ModifiedCount > 0 ? id : null;
+        }
+
+        throw new Exception("Unsupported activity type or payload");
     }
 
-    throw new Exception("Unsupported activity type or payload");
-}
+    public async Task<string?> UpdateBookAddedToShelfActivityAsync(string id, Activity activity) {
+        var filter = Builders<Activity>.Filter.Eq(a => a.Id, id);
 
+        if (activity.Type == Activity.ActivityType.AddedBookToShelf) {
+            // Deserialize Payload into expected type
+            var json = JsonConvert.SerializeObject(activity.Payload);
+            var bookAddedToShelfPayload = JsonConvert.DeserializeObject<AddedBookToShelfPayload>(json);
+
+            if (bookAddedToShelfPayload == null)
+                throw new Exception("Invalid payload for AddedBookToShelf");
+
+            var update = Builders<Activity>.Update
+                .Set("Payload.TargetShelfName", bookAddedToShelfPayload.TargetShelfName)
+                .Set("Payload.SourceShelfName", bookAddedToShelfPayload.SourceShelfName)
+                .Set("Payload.IsUpdate", bookAddedToShelfPayload.IsUpdate)
+                .Set(a => a.UpdatedAt, DateTime.UtcNow);
+
+            var result = await getCollection().UpdateOneAsync(filter, update);
+            return result.ModifiedCount > 0 ? id : null;
+        }
+
+        throw new Exception("Unsupported activity type or payload");
+    }
 }

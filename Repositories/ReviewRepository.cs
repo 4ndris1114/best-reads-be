@@ -53,7 +53,7 @@ namespace BestReads.Repositories {
                 var update = Builders<Book>.Update
                     .Set("Reviews.$.RatingValue", updatedReview.RatingValue)
                     .Set("Reviews.$.ReviewText", updatedReview.ReviewText)
-                    .Set("Reviews.$.isPublic", updatedReview.isPublic)
+                    .Set("Reviews.$.IsPublic", updatedReview.IsPublic)
                     .Set("Reviews.$.UpdatedAt", DateTime.UtcNow);
 
                 var result = await _books.UpdateOneAsync(filter, update);

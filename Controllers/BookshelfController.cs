@@ -221,7 +221,7 @@ public class BookshelfController : ControllerBase
             var result = await _bookshelfRepository.AddBookToBookshelfAsync(userId, shelfId, bookId);
             
             if (result) {
-                await _activityService.LogBookAddedToShelfAsync(userId, bookId, book.Title, book.CoverImage, bookshelf.Name);
+                await _activityService.LogBookAddedToShelfAsync(userId, bookId, book.Title, book.CoverImage, false, null, bookshelf.Name);
             }
             return Ok(bookId);
         } catch (Exception ex) {
@@ -281,7 +281,28 @@ public class BookshelfController : ControllerBase
             {
                 return BadRequest($"Missing or invalid required parameter: {missing}");
             }
-            await _bookshelfRepository.MoveBookToAnotherBookshelfAsync(userId, sourceShelfId, bookId, targetShelfId);
+            // Check if the book exists
+            var book = await _bookRepository.GetByIdAsync(bookId);
+            if (book == null)
+            {
+                return NotFound($"Book with ID '{bookId}' does not exist.");
+            }
+
+            var sourceShelf = await _bookshelfRepository.GetBookshelfByIdAsync(userId, sourceShelfId);
+            var targetShelf = await _bookshelfRepository.GetBookshelfByIdAsync(userId, targetShelfId);
+            if (sourceShelf?.Books != null && !sourceShelf.Books.Contains(bookId))
+            {
+                return Conflict($"Book with ID {bookId} is not part of bookshelf {sourceShelfId}.");
+            }
+            if (targetShelf?.Books != null && targetShelf.Books.Contains(bookId))
+            {
+                return Conflict($"Book with ID {bookId} is already in bookshelf {targetShelfId}.");
+            }
+            var result = await _bookshelfRepository.MoveBookToAnotherBookshelfAsync(userId, sourceShelfId, bookId, targetShelfId);
+            
+            if (result) {
+                await _activityService.LogBookAddedToShelfAsync(userId, bookId, book.Title, book.CoverImage, true, sourceShelf.Name, targetShelf.Name);
+            }
             return Ok(bookId);
         } catch (Exception ex) {
             _logger.LogError(ex, $"Failed to move book {bookId} from shelf {sourceShelfId} to {targetShelfId} for user {userId}");

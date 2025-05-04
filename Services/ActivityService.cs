@@ -13,7 +13,7 @@ public class ActivityService {
         _activityRepository = activityRepository;
     }
 
-    public async Task<string?> LogBookAddedToShelfAsync(string userId, string bookId, string bookTitle, string coverImage, string shelfName) {
+    public async Task<string?> LogBookAddedToShelfAsync(string userId, string bookId, string bookTitle, string coverImage, bool isUpdate, string? sourceShelfName, string? targetShelfName) {
         var activity = new Activity {
             UserId = userId,
             Type = Activity.ActivityType.AddedBookToShelf,
@@ -23,11 +23,18 @@ public class ActivityService {
             {
                 BookTitle = bookTitle,
                 CoverImage = coverImage,
-                ShelfName = shelfName
+                TargetShelfName = targetShelfName,
+                SourceShelfName = isUpdate ? sourceShelfName : null,
+                IsUpdate = isUpdate
             }
         };
 
-        return await _activityRepository.AddActivityAsync(activity);
+        if (isUpdate) {
+            var activityId = await _activityRepository.GetActivityByUserAndBookIdAsync(userId, bookId).ContinueWith(t => t.Result?.Id);
+            return await _activityRepository.UpdateBookAddedToShelfActivityAsync(activityId, activity);
+        } else {
+            return await _activityRepository.AddActivityAsync(activity);
+        }
     }
 
     public async Task<string?> LogBookReviewedAsync(string userId, string bookId, string bookTitle, string coverImage, double rating, string? reviewText, bool isUpdate) {
@@ -46,7 +53,10 @@ public class ActivityService {
         };
         if (isUpdate) {
             var activityId = await _activityRepository.GetActivityByUserAndBookIdAsync(userId, bookId).ContinueWith(t => t.Result?.Id);
-            return await _activityRepository.UpdateActivityAsync(activityId, activity);
+            if (activityId == null) {
+                return await _activityRepository.AddActivityAsync(activity);
+            }
+            return await _activityRepository.UpdateReviewActivityAsync(activityId, activity);
         } else {
             return await _activityRepository.AddActivityAsync(activity);
         }
