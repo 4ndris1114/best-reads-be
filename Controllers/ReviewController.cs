@@ -130,6 +130,7 @@ namespace BestReads.Controllers
                 if (result) {
                     await _activityService.LogBookReviewedAsync(updatedReview.UserId, bookId, book.Title, book.CoverImage, updatedReview.RatingValue, updatedReview.ReviewText, true);
                 }
+                //return updated review and activityId (null if not updated)
                 return Ok(updatedReview);
             }
             catch (Exception ex)
