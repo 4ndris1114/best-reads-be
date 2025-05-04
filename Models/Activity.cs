@@ -18,6 +18,13 @@ public class Activity {
     [BsonElement("createdAt")]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+    [BsonElement("updatedAt")]
+    public DateTime UpdatedAt { get; set; }
+
+    // Optional: only used for certain types like RatedBook
+    [BsonElement("bookId")]
+    public string? BookId { get; set; }
+
     public object Payload { get; set; }
 
     public enum ActivityType {
