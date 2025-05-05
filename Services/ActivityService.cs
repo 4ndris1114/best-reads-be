@@ -25,11 +25,11 @@ public class ActivityService {
             CreatedAt = DateTime.UtcNow,
             Payload = new
             {
-                BookTitle = bookTitle,
-                CoverImage = coverImage,
-                TargetShelfName = targetShelfName,
-                SourceShelfName = isUpdate ? sourceShelfName : null,
-                IsUpdate = isUpdate
+                bookTitle = bookTitle,
+                coverImage = coverImage,
+                targetShelfName = targetShelfName,
+                sourceShelfName = isUpdate ? sourceShelfName : null,
+                isUpdate = isUpdate
             }
         };
 
@@ -38,7 +38,7 @@ public class ActivityService {
 
             if (id != null) {
                 // Send the full activity to all clients
-                await _hubContext.Clients.AllExcept(Context.ConnectionId).SendAsync("ReceiveActivity", activity);
+                await _hubContext.Clients.All.SendAsync("ReceiveActivity", activity);
             }
             return id;
         } catch (Exception ex) {
@@ -56,12 +56,22 @@ public class ActivityService {
             Payload = new {
                 BookTitle = bookTitle,
                 CoverImage = coverImage,
-                Rating = rating,
-                ReviewText = reviewText,
-                IsUpdate = isUpdate
+                rating = rating,
+                reviewText = reviewText,
+                isUpdate = isUpdate
             }
         };
+        try {
+            var id = await _activityRepository.AddActivityAsync(activity);
 
-        return await _activityRepository.AddActivityAsync(activity);
+            if (id != null) {
+                // Send the full activity to all clients
+                await _hubContext.Clients.All.SendAsync("ReceiveActivity", activity);
+            }
+            return id;
+        } catch (Exception ex) {
+            Console.WriteLine($"Error logging activity: {ex}");
+            return null;
+        }
     }
 }
