@@ -12,18 +12,16 @@ namespace BestReads.Repositories;
 public class ActivityRepository : BaseRepository<Activity>{
     public ActivityRepository(MongoDbContext context) : base(context, "activities") { }
 
-    public async Task<List<Activity>> GetRecentActivitiesAsync(IEnumerable<string> followingUserIds, int limit = 20) {
-
+    public async Task<List<Activity>> GetRecentActivitiesAsync(IEnumerable<string> followingUserIds, int skip = 0, int limit = 20) {
         var filter = Builders<Activity>.Filter.In(a => a.UserId, followingUserIds);
         var sort = Builders<Activity>.Sort.Descending(a => a.CreatedAt);
 
-        var activities = await getCollection()
+        return await getCollection()
             .Find(filter)
             .Sort(sort)
+            .Skip(skip)
             .Limit(limit)
             .ToListAsync();
-
-        return activities;
     }
     
     public async Task<Activity> GetActivityByUserAndBookIdAsync(string userId, string bookId) {

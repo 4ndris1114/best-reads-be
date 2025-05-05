@@ -20,7 +20,7 @@ public class ActivityController : ControllerBase {
 
     [HttpGet("feed")]
     [Authorize]
-    public async Task<IActionResult> GetActivityFeed(){
+    public async Task<IActionResult> GetActivityFeed([FromQuery] int skip = 0, [FromQuery] int limit = 20) {
         var userId = User.FindFirstValue("userId");
 
         if (userId == null)
@@ -30,7 +30,7 @@ public class ActivityController : ControllerBase {
         if (user == null)
             return NotFound();
 
-        var activities = await _activityRepository.GetRecentActivitiesAsync(user.Following);
+        var activities = await _activityRepository.GetRecentActivitiesAsync(user.Following, skip, limit);
 
         return Ok(activities);
     }
