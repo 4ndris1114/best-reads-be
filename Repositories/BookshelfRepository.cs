@@ -90,7 +90,7 @@ public class BookshelfRepository {
     }
 
     // Add a book to a bookshelf - can optionally take session in case of transaction (from moveBook method)
-    public async Task AddBookToBookshelfAsync(string userId, string shelfId, string bookId, IClientSessionHandle? session = null) {
+    public async Task<bool> AddBookToBookshelfAsync(string userId, string shelfId, string bookId, IClientSessionHandle? session = null) {
         var filter = Builders<User>.Filter.And(
             Builders<User>.Filter.Eq(u => u.Id, userId),
             Builders<User>.Filter.ElemMatch(u => u.Bookshelves, b => b.Id == shelfId)
@@ -98,11 +98,11 @@ public class BookshelfRepository {
 
         var update = Builders<User>.Update.Push("Bookshelves.$.Books", bookId);
 
-        var updateTask = session != null
-            ? _users.UpdateOneAsync(session, filter, update)
-            : _users.UpdateOneAsync(filter, update);
+        UpdateResult result = session != null
+            ? await _users.UpdateOneAsync(session, filter, update)
+            : await _users.UpdateOneAsync(filter, update);
 
-        await updateTask;
+        return result.MatchedCount > 0 && result.ModifiedCount > 0;
     }
 
     // Remove a book from a bookshelf - can optionally take session in case of transaction (from moveBook method)
@@ -127,7 +127,7 @@ public class BookshelfRepository {
     }
 
     // Move a book from one shelf to another
-    public async Task MoveBookToAnotherBookshelfAsync(string userId, string fromShelfId, string bookId, string toShelfId) {
+    public async Task<bool> MoveBookToAnotherBookshelfAsync(string userId, string fromShelfId, string bookId, string toShelfId) {
         try {
             using (var session = await _users.Database.Client.StartSessionAsync()) {
                 session.StartTransaction();
@@ -137,6 +137,7 @@ public class BookshelfRepository {
                     await AddBookToBookshelfAsync(userId, toShelfId, bookId, session);
 
                     await session.CommitTransactionAsync();
+                    return true;
                 } catch (Exception) {
                     await session.AbortTransactionAsync();
                     throw;

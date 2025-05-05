@@ -1,5 +1,6 @@
 using DotNetEnv;
 using BestReads.Database;
+using BestReads.Services;
 using BestReads.Repositories;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -13,6 +14,8 @@ Env.Load();
 var mongoDbConnectionString = Environment.GetEnvironmentVariable("MONGO_CONNECTION_STRING")!;
 
 builder.Configuration.AddEnvironmentVariables();
+
+builder.Services.AddScoped<ActivityService>();
 
 builder.Services.AddControllers();
 

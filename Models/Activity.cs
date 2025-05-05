@@ -10,22 +10,25 @@ public class Activity {
     public string? Id { get; set; }
 
     [BsonElement("userId")]
-    public ObjectId UserId { get; set; }
+    public string? UserId { get; set; }
 
     [BsonElement("type")]
-    public string Type { get; set; } = string.Empty; // "review", "rating", "shelf_update", "progress_update"
-
-    [BsonElement("bookId")]
-    public ObjectId BookId { get; set; }
-
-    [BsonElement("content")]
-    
-    [MaxLength(1000)]
-    public string Content { get; set; } = string.Empty; // Review text, rating, or update message
+    public ActivityType Type { get; set; }
 
     [BsonElement("createdAt")]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     [BsonElement("updatedAt")]
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime UpdatedAt { get; set; }
+
+    // Optional: only used for certain types like RatedBook
+    [BsonElement("bookId")]
+    public string? BookId { get; set; }
+
+    public object Payload { get; set; }
+
+    public enum ActivityType {
+        AddedBookToShelf,
+        RatedBook
+    }
 }

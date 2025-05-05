@@ -1,5 +1,6 @@
 using BestReads.Models;
 using BestReads.Repositories;
+using BestReads.Services;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using System.Linq;
@@ -12,13 +13,15 @@ public class BookshelfController : ControllerBase
 {
     private readonly BookshelfRepository _bookshelfRepository;
     private readonly BookRepository _bookRepository;
+    private readonly ActivityService _activityService;
 
     private readonly ILogger<BookshelfController> _logger;
 
-    public BookshelfController(BookshelfRepository bookshelfRepository, BookRepository bookRepository, ILogger<BookshelfController> logger)
+    public BookshelfController(BookshelfRepository bookshelfRepository, BookRepository bookRepository, ActivityService activityService, ILogger<BookshelfController> logger)
     {
         _bookshelfRepository = bookshelfRepository;
         _bookRepository = bookRepository;
+        _activityService = activityService;
         _logger = logger;
     }
 
@@ -215,7 +218,11 @@ public class BookshelfController : ControllerBase
                 return BadRequest($"Book with ID '{bookId}' is already in the bookshelf.");
             }
 
-            await _bookshelfRepository.AddBookToBookshelfAsync(userId, shelfId, bookId);
+            var result = await _bookshelfRepository.AddBookToBookshelfAsync(userId, shelfId, bookId);
+            
+            if (result) {
+                await _activityService.LogBookAddedToShelfAsync(userId, bookId, book.Title, book.CoverImage, false, null, bookshelf.Name);
+            }
             return Ok(bookId);
         } catch (Exception ex) {
             _logger.LogError(ex, $"Failed to add book {bookId} to shelf {shelfId} for user {userId}");
@@ -274,7 +281,28 @@ public class BookshelfController : ControllerBase
             {
                 return BadRequest($"Missing or invalid required parameter: {missing}");
             }
-            await _bookshelfRepository.MoveBookToAnotherBookshelfAsync(userId, sourceShelfId, bookId, targetShelfId);
+            // Check if the book exists
+            var book = await _bookRepository.GetByIdAsync(bookId);
+            if (book == null)
+            {
+                return NotFound($"Book with ID '{bookId}' does not exist.");
+            }
+
+            var sourceShelf = await _bookshelfRepository.GetBookshelfByIdAsync(userId, sourceShelfId);
+            var targetShelf = await _bookshelfRepository.GetBookshelfByIdAsync(userId, targetShelfId);
+            if (sourceShelf?.Books != null && !sourceShelf.Books.Contains(bookId))
+            {
+                return Conflict($"Book with ID {bookId} is not part of bookshelf {sourceShelfId}.");
+            }
+            if (targetShelf?.Books != null && targetShelf.Books.Contains(bookId))
+            {
+                return Conflict($"Book with ID {bookId} is already in bookshelf {targetShelfId}.");
+            }
+            var result = await _bookshelfRepository.MoveBookToAnotherBookshelfAsync(userId, sourceShelfId, bookId, targetShelfId);
+            
+            if (result) {
+                await _activityService.LogBookAddedToShelfAsync(userId, bookId, book.Title, book.CoverImage, true, sourceShelf.Name, targetShelf.Name);
+            }
             return Ok(bookId);
         } catch (Exception ex) {
             _logger.LogError(ex, $"Failed to move book {bookId} from shelf {sourceShelfId} to {targetShelfId} for user {userId}");

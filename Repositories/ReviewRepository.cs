@@ -29,19 +29,21 @@ namespace BestReads.Repositories {
         }
 
         // Add a review to a book
-        public async Task PostReviewAsync(string bookId, Review newReview) {
+        public async Task<bool> PostReviewAsync(string bookId, Review newReview) {
             try {
                 var filter = Builders<Book>.Filter.Eq(b => b.Id, bookId);
                 var update = Builders<Book>.Update.Push(b => b.Reviews, newReview);
 
-                await _books.UpdateOneAsync(filter, update);
+                var result = await _books.UpdateOneAsync(filter, update);
+
+                return result.MatchedCount > 0 && result.ModifiedCount > 0;
             } catch (Exception ex) {
                 _logger.LogError(ex, $"Error adding review to book with id {bookId}");
                 throw;
             }
         }
 
-        public async Task UpdateReviewAsync(string bookId, string reviewId, Review updatedReview) {
+        public async Task<bool> UpdateReviewAsync(string bookId, string reviewId, Review updatedReview) {
             try {
                 var filter = Builders<Book>.Filter.And(
                     Builders<Book>.Filter.Eq(b => b.Id, bookId),
@@ -51,10 +53,12 @@ namespace BestReads.Repositories {
                 var update = Builders<Book>.Update
                     .Set("Reviews.$.RatingValue", updatedReview.RatingValue)
                     .Set("Reviews.$.ReviewText", updatedReview.ReviewText)
-                    .Set("Reviews.$.isPublic", updatedReview.isPublic)
+                    .Set("Reviews.$.IsPublic", updatedReview.IsPublic)
                     .Set("Reviews.$.UpdatedAt", DateTime.UtcNow);
 
-                await _books.UpdateOneAsync(filter, update);
+                var result = await _books.UpdateOneAsync(filter, update);
+
+                return result.MatchedCount > 0 && result.ModifiedCount > 0;
             } catch (Exception ex) {
                 _logger.LogError(ex, $"Error updating review {reviewId} on book {bookId}");
                 throw;
