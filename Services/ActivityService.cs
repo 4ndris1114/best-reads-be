@@ -54,8 +54,8 @@ public class ActivityService {
             BookId = bookId,
             CreatedAt = DateTime.UtcNow,
             Payload = new {
-                BookTitle = bookTitle,
-                CoverImage = coverImage,
+                bookTitle = bookTitle,
+                coverImage = coverImage,
                 rating = rating,
                 reviewText = reviewText,
                 isUpdate = isUpdate
