@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Text;
 using Microsoft.OpenApi.Models;
 using Microsoft.Extensions.Options;
+using BestReads.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,12 +20,16 @@ builder.Services.AddScoped<ActivityService>();
 
 builder.Services.AddControllers();
 
+builder.Services.AddSignalR();
+
+// Configure CORS
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", builder => 
-        builder.AllowAnyOrigin()
-               .AllowAnyMethod()
-               .AllowAnyHeader());
+    options.AddPolicy("AllowSpecificOrigin",
+        policy => policy.WithOrigins("http://localhost:5173")
+                        .AllowCredentials()
+                        .AllowAnyHeader()
+                        .AllowAnyMethod());
 });
 
 var assembly = typeof(Program).Assembly;
@@ -91,7 +96,7 @@ builder.Services.AddAuthorization();  // To use authorization
 
 var app = builder.Build();
 
-app.UseCors("AllowAll");
+app.UseCors("AllowSpecificOrigin");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -108,6 +113,7 @@ app.UseAuthentication(); // Add authentication middleware
 app.UseAuthorization();  // Add authorization middleware
 
 app.MapControllers();
+app.MapHub<ActivityHub>("/hubs/activity");
 
-Console.WriteLine("Starting application");
+Console.WriteLine("Starting application...");
 app.Run();
