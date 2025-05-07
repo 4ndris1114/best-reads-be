@@ -99,7 +99,7 @@ public class AuthController : ControllerBase {
                 return BadRequest("Incorrect password");
             
             //create jwt token
-            var token = GenerateJwtToken(user);
+            var token = GenerateJwtToken(user, userLogin.RememberMe);
             return Ok(token);
         } catch (Exception ex) {
             _logger.LogError(ex, "Error logging in user");
@@ -176,25 +176,28 @@ public class AuthController : ControllerBase {
     }
 
     //generate jwt token
-    private string GenerateJwtToken(User user) {
-        var claims = new[] {
-            new Claim(JwtRegisteredClaimNames.Sub, user.Email!),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new Claim("userId", user.Id!.ToString())
-        };
+private string GenerateJwtToken(User user, bool rememberMe) {
+    var claims = new[] {
+        new Claim(JwtRegisteredClaimNames.Sub, user.Email!),
+        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+        new Claim("userId", user.Id!.ToString())
+    };
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT_SECRET"]!));
-        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+    var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT_SECRET"]!));
+    var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-        var token = new JwtSecurityToken(
-            issuer: "localhost",
-            audience: "localhost",
-            claims: claims,
-            expires: DateTime.Now.AddHours(1),
-            signingCredentials: creds);
+    var expiry = rememberMe ? DateTime.Now.AddDays(14) : DateTime.Now.AddHours(2);
 
-        return new JwtSecurityTokenHandler().WriteToken(token);
-    }
+    var token = new JwtSecurityToken(
+        issuer: "localhost",
+        audience: "localhost",
+        claims: claims,
+        expires: expiry,
+        signingCredentials: creds
+    );
+
+    return new JwtSecurityTokenHandler().WriteToken(token);
+}
 
     // Get Principal from the expired JWT token
     private ClaimsPrincipal? GetPrincipalFromExpiredToken(string token) {
