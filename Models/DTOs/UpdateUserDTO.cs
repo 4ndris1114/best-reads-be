@@ -24,7 +24,7 @@ public class UpdateUserDTO {
     public string? ProfilePicture { get; set; }
 
     [BsonElement("bio")]
-    [MaxLength(200, ErrorMessage = "Bio cannot exceed 200 characters")]
+    [MaxLength(500, ErrorMessage = "Bio cannot exceed 500 characters")]
     public string? Bio { get; set; }
 
     [BsonElement("bookshelves")]

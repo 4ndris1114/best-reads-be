@@ -55,6 +55,7 @@ public class StatsController : ControllerBase
     }
 
     [HttpPut("{userId}/edit/{progressId}")]
+
     public async Task<ActionResult<ReadingProgress>> UpdateReadingProgress(string userId, ReadingProgress readingProgress) {
         try {
             var updatedStats = await _statsRepository.UpdateReadingProgressAsync(userId, readingProgress);
