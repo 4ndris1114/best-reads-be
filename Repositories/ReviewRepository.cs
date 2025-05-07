@@ -33,7 +33,6 @@ namespace BestReads.Repositories {
             try {
                 var filter = Builders<Book>.Filter.Eq(b => b.Id, bookId);
                 var update = Builders<Book>.Update.Push(b => b.Reviews, newReview);
-
                 var result = await _books.UpdateOneAsync(filter, update);
 
                 return result.MatchedCount > 0 && result.ModifiedCount > 0;

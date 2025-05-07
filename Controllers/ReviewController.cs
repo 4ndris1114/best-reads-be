@@ -15,6 +15,13 @@ namespace BestReads.Controllers
     {
         private readonly ReviewRepository _reviewRepository;
         private readonly BookRepository _bookRepository;
+        private readonly ILogger<ReviewController> _logger;
+
+        public ReviewController(ReviewRepository reviewRepository, BookRepository bookRepository, ILogger<ReviewController> logger)
+        {
+            _reviewRepository = reviewRepository;
+            _bookRepository = bookRepository;
+
         private readonly ActivityService _activityService;
         private readonly ILogger<ReviewController> _logger;
 

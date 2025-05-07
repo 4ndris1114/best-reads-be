@@ -24,11 +24,11 @@ public class StatsController : ControllerBase
             return Ok(readingProgress);
         }
         catch (Exception ex) {
-            return StatusCode(500, "Error getting reading progress");
+            return StatusCode(500, $"Error getting reading progress: {ex.Message}");
         }
     }
 
-    [HttpGet("{progressId}")]
+    [HttpGet("{userId}/progress/{progressId}")]
     public async Task<ActionResult<ReadingProgress>> GetReadingProgressById(string userId, string progressId) {
         try {
             var readingProgress = await _statsRepository.GetReadingProgressByIdAsync(userId, progressId);
@@ -37,7 +37,7 @@ public class StatsController : ControllerBase
             return Ok(readingProgress);
         }
         catch (Exception ex) {
-            return StatusCode(500, "Error getting reading progress");
+            return StatusCode(500, $"Error getting reading progress by Id: {ex.Message}");
         }
     }
 
@@ -54,7 +54,8 @@ public class StatsController : ControllerBase
         }
     }
 
-    [HttpPut("{progressId}/update")]
+    [HttpPut("{userId}/edit/{progressId}")]
+
     public async Task<ActionResult<ReadingProgress>> UpdateReadingProgress(string userId, ReadingProgress readingProgress) {
         try {
             var updatedStats = await _statsRepository.UpdateReadingProgressAsync(userId, readingProgress);
