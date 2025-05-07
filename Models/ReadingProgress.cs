@@ -18,17 +18,6 @@ public class ReadingProgress {
     [Range(0, int.MaxValue, ErrorMessage = "Current page must not be negative")]
     public int CurrentPage { get; set; }
 
-
-    [BsonElement("totalPages")]
-    [Range(0, int.MaxValue, ErrorMessage = "Total pages must not be negative")]
-    public int TotalPages { get; set; }
-
-
-    [BsonElement("currentPage")]
-    [Range(0, int.MaxValue, ErrorMessage = "Current page must not be negative")]
-    public int CurrentPage { get; set; }
-
-
     [BsonElement("totalPages")]
     [Range(0, int.MaxValue, ErrorMessage = "Total pages must not be negative")]
     public int TotalPages { get; set; }
