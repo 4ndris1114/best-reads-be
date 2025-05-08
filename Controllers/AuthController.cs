@@ -64,6 +64,7 @@ public class AuthController : ControllerBase {
                     new Bookshelf { Id = ObjectId.GenerateNewId().ToString(), Name = "Read", Books = new List<string>(), IsMutable = false },
                 },
                 ReadingProgress = new List<ReadingProgress>(),
+                ReadingChallenges = new List<ReadingChallenge>(),
                 Followers = new List<string>(),
                 Following = new List<string>(),
                 ReadingStats = new ReadingStats(),
