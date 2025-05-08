@@ -19,10 +19,10 @@ public class ReadingChallengeController :  ControllerBase {
     [HttpGet("{userId}")]
     public async Task<ActionResult<ReadingChallenge>> GetAllReadingChallenges(string userId) {
         try {
-            var readingChallenges = await _readingChallengeRepository.GetAllReadingChallengeAsync(userId);
+            var readingChallenges = await _readingChallengeRepository.GetAllReadingChallengesAsync(userId);
             if (readingChallenges == null)
                 return NotFound("Reading challenge not found");
-            return Ok(readingChallenge);
+            return Ok(readingChallenges);
         }
         catch (Exception ex) {
             return StatusCode(500, $"Error getting reading challenge: {ex.Message}");
@@ -73,7 +73,7 @@ public class ReadingChallengeController :  ControllerBase {
         try {
             var updatedChallenge = await _readingChallengeRepository.UpdateReadingChallengeAsync(userId, readingChallenge);
             if (updatedChallenge == null)
-                return NotFound("User not found");
+                return NotFound("Reading challenge or User not found");
             return Ok(updatedChallenge);
         }
         catch (Exception ex) {
@@ -82,12 +82,10 @@ public class ReadingChallengeController :  ControllerBase {
     }
 
     [HttpDelete("{userId}/{challengeId}")]
-    public async Task<ActionResult<ReadingChallenge>> DeleteReadingChallenge(string userId, string challengeId) {
+    public async Task<ActionResult<bool>> DeleteReadingChallenge(string userId, string challengeId) {
         try {
-            var deletedChallenge = await _readingChallengeRepository.DeleteReadingChallengeAsync(userId, challengeId);
-            if (deletedChallenge == null)
-                return NotFound("Reading challenge not found");
-            return Ok(deletedChallenge);
+            var wasDeleted = await _readingChallengeRepository.DeleteReadingChallengeAsync(userId, challengeId);
+            return Ok(wasDeleted);
         }
         catch (Exception ex) {
             return StatusCode(500, $"Error deleting reading challenge: {ex.Message}");
