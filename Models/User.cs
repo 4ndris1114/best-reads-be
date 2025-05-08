@@ -47,6 +47,9 @@ public class User {
     [BsonElement("readingStats")]
     public ReadingStats? ReadingStats { get; set; }
 
+    [BsonElement("readingChallenges")]
+    public List<ReadingChallenge>? ReadingChallenges { get; set; }
+
     [BsonElement("createdAt")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
