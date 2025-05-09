@@ -15,7 +15,7 @@ public class Bookshelf{
     public string? Name { get; set; }
     
     [BsonElement("books")]
-    public List<string>? Books { get; set; }
+    public List<BookshelfBook>? Books { get; set; }
 
     [BsonElement("isMutable")]
     public bool IsMutable { get; set; } = true;
