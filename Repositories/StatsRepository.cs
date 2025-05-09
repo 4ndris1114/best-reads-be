@@ -74,15 +74,40 @@ public class StatsRepository
             // Perform the update operation
             var result = await _users.UpdateOneAsync(filter, update);
 
-            // Return the updated reading progress if successful
-            if (result.ModifiedCount > 0)
-            {
-                return readingProgress; // Return the updated reading progress
-            }
+            // 2. If update was successful and book is finished
+        if (result.ModifiedCount > 0 && readingProgress.CurrentPage == readingProgress.TotalPages) {
+            var user = await _users.Find(u => u.Id == userId).FirstOrDefaultAsync();
+            if (user == null) return readingProgress;
 
-            return null; // If no match was found or nothing was updated
-        } catch (Exception ex) {
-            throw new Exception($"Error updating reading progress {ex.Message}");
+            var currentlyReadingShelf = user.Bookshelves.FirstOrDefault(s => s.Name == "Currently Reading");
+            var readShelf = user.Bookshelves.FirstOrDefault(s => s.Name == "Read");
+
+            if (currentlyReadingShelf != null && readShelf != null && currentlyReadingShelf.Books.Contains(readingProgress.BookId)) {
+                // Remove from Currently Reading
+                var removeFilter = Builders<User>.Filter.Eq(u => u.Id, userId);
+                var removeUpdate = Builders<User>.Update.Pull("Bookshelves.$[s].Books", readingProgress.BookId);
+                var removeOptions = new UpdateOptions {
+                    ArrayFilters = new List<ArrayFilterDefinition> {
+                        new JsonArrayFilterDefinition<BsonDocument>("{ 's.Name': 'Currently Reading' }")
+                    }
+                };
+                await _users.UpdateOneAsync(removeFilter, removeUpdate, removeOptions);
+
+                // Add to Read
+                var addUpdate = Builders<User>.Update.Push("Bookshelves.$[s].Books", readingProgress.BookId);
+                var addOptions = new UpdateOptions {
+                    ArrayFilters = new List<ArrayFilterDefinition> {
+                        new JsonArrayFilterDefinition<BsonDocument>("{ 's.Name': 'Read' }")
+                    }
+                };
+                await _users.UpdateOneAsync(removeFilter, addUpdate, addOptions);
+            }
+            return readingProgress;
         }
+
+        return result.ModifiedCount > 0 ? readingProgress : null;
+    } catch (Exception ex) {
+        throw new Exception($"Error updating reading progress: {ex.Message}");
+    }
     }
 }

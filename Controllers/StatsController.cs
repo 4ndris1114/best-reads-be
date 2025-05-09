@@ -55,16 +55,24 @@ public class StatsController : ControllerBase
     }
 
     [HttpPut("{userId}/edit/{progressId}")]
-
-    public async Task<ActionResult<ReadingProgress>> UpdateReadingProgress(string userId, ReadingProgress readingProgress) {
-        try {
-            var updatedStats = await _statsRepository.UpdateReadingProgressAsync(userId, readingProgress);
-            if (updatedStats == null)
-                return NotFound("User not found");
-            return Ok(updatedStats);
+public async Task<ActionResult<ReadingProgress>> UpdateReadingProgress(string userId, string progressId, [FromBody] ReadingProgress readingProgress) {
+    try {
+        if (readingProgress == null || progressId != readingProgress.Id) {
+            return BadRequest("Invalid reading progress data.");
         }
-        catch (Exception ex) {
-            return StatusCode(500, $"Error updating reading progress: {ex.Message}");
+
+        if (readingProgress.CurrentPage > readingProgress.TotalPages) {
+            return BadRequest("Current page cannot exceed total pages.");
+        }
+
+        var updatedStats = await _statsRepository.UpdateReadingProgressAsync(userId, readingProgress);
+        if (updatedStats == null)
+            return NotFound("User or reading progress not found.");
+
+        return Ok(updatedStats);
+    }
+    catch (Exception ex) {
+        return StatusCode(500, $"Error updating reading progress: {ex.Message}");
         }
     }
 }

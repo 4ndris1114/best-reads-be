@@ -14,12 +14,14 @@ public class BookshelfController : ControllerBase
     private readonly BookshelfRepository _bookshelfRepository;
     private readonly BookRepository _bookRepository;
     private readonly ActivityService _activityService;
+    private readonly StatsRepository _statsRepository;
 
     private readonly ILogger<BookshelfController> _logger;
 
-    public BookshelfController(BookshelfRepository bookshelfRepository, BookRepository bookRepository, ActivityService activityService, ILogger<BookshelfController> logger)
+    public BookshelfController(BookshelfRepository bookshelfRepository, BookRepository bookRepository, ActivityService activityService, StatsRepository statsRepository, ILogger<BookshelfController> logger)
     {
         _bookshelfRepository = bookshelfRepository;
+        _statsRepository = statsRepository;
         _bookRepository = bookRepository;
         _activityService = activityService;
         _logger = logger;
@@ -193,23 +195,17 @@ public class BookshelfController : ControllerBase
     /// <param name="bookId">The unique identifier for the book.</param>
     /// <returns></returns>
     [HttpPost("{shelfId}/books")]
-    public async Task<ActionResult> AddBookToBookshelf(string userId, string shelfId, [FromBody] string bookId)
-    {
-        try
-        {
-            if (!ValidateInputs(out var missing, (userId, "userId"), (shelfId, "shelfId")))
-            {
+    public async Task<ActionResult> AddBookToBookshelf(string userId, string shelfId, [FromBody] string bookId) {
+        try {
+            if (!ValidateInputs(out var missing, (userId, "userId"), (shelfId, "shelfId"))) {
                 return BadRequest($"Missing or invalid required parameter: {missing}");
-            }
-            if (string.IsNullOrWhiteSpace(bookId))
-            {
+            } if (string.IsNullOrWhiteSpace(bookId)) {
                 return BadRequest("Book ID is required.");
             }
 
             // Check if the book exists
             var book = await _bookRepository.GetByIdAsync(bookId);
-            if (book == null)
-            {
+            if (book == null) {
                 return NotFound($"Book with ID '{bookId}' does not exist.");
             }
 
@@ -217,18 +213,28 @@ public class BookshelfController : ControllerBase
             if (bookshelf?.Books != null && bookshelf.Books.Contains(bookId)) {
                 return BadRequest($"Book with ID '{bookId}' is already in the bookshelf.");
             }
+                 var result = await _bookshelfRepository.AddBookToBookshelfAsync(userId, shelfId, bookId);
 
-            var result = await _bookshelfRepository.AddBookToBookshelfAsync(userId, shelfId, bookId);
-            
-            if (result) {
-                await _activityService.LogBookAddedToShelfAsync(userId, bookId, book.Title, book.CoverImage, false, null, bookshelf.Name);
+        if (result) {
+            await _activityService.LogBookAddedToShelfAsync(userId, bookId, book.Title, book.CoverImage, false, null, bookshelf.Name);
+
+            // If it's the "Currently Reading" shelf, add initial reading progress
+            if (bookshelf.Name != null && bookshelf.Name.Equals("Currently Reading", StringComparison.OrdinalIgnoreCase)) {
+                var readingProgress = new ReadingProgress {
+                    BookId = book.Id,
+                    TotalPages = book.NumberOfPages,
+                    CurrentPage = 0
+                };
+                await _statsRepository.AddReadingProgressAsync(userId, readingProgress);
             }
             return Ok(bookId);
-        } catch (Exception ex) {
-            _logger.LogError(ex, $"Failed to add book {bookId} to shelf {shelfId} for user {userId}");
-            return StatusCode(500, "An error occurred while adding the book.");
         }
+        return StatusCode(500, "Failed to add the book to the bookshelf.");
+    } catch (Exception ex) {
+        _logger.LogError(ex, $"Failed to add book {bookId} to shelf {shelfId} for user {userId}");
+        return StatusCode(500, "An error occurred while adding the book.");
     }
+}
 
     // DELETE: api/bookshelf/{userId}/{shelfId}/books/{bookId}
     /// <summary>
