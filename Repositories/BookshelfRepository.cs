@@ -49,7 +49,7 @@ public class BookshelfRepository {
         try {
             newShelf.Id = ObjectId.GenerateNewId().ToString();
             if (newShelf.Books == null) {
-                newShelf.Books = new List<string>();
+                newShelf.Books = new List<BookshelfBook>();
             }
             var filter = Builders<User>.Filter.Eq(u => u.Id, userId);
             var update = Builders<User>.Update.Push(u => u.Bookshelves, newShelf);
@@ -96,7 +96,7 @@ public class BookshelfRepository {
             Builders<User>.Filter.ElemMatch(u => u.Bookshelves, b => b.Id == shelfId)
         );
 
-        var update = Builders<User>.Update.Push("Bookshelves.$.Books", bookId);
+        var update = Builders<User>.Update.Push("Bookshelves.$.Books", new BookshelfBook { Id = bookId });
 
         UpdateResult result = session != null
             ? await _users.UpdateOneAsync(session, filter, update)
@@ -113,14 +113,16 @@ public class BookshelfRepository {
                 Builders<User>.Filter.ElemMatch(u => u.Bookshelves, b => b.Id == shelfId)
             );
 
-            var update = Builders<User>.Update.Pull("bookshelves.$.books", bookId);
-            
+            var update = Builders<User>.Update.PullFilter("bookshelves.$.books",
+                Builders<BookshelfBook>.Filter.Eq(b => b.Id, bookId));
+
             var updateTask = session != null
                 ? _users.UpdateOneAsync(session, filter, update)
                 : _users.UpdateOneAsync(filter, update);
 
             await updateTask;
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             _logger.LogError(ex, $"Error removing book {bookId} from bookshelf {shelfId} for user {userId}");
             throw;
         }
