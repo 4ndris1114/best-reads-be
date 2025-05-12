@@ -14,7 +14,11 @@ public class StatsController : ControllerBase
     {
         _statsRepository = statsRepository;
     }
-
+/// <summary>
+/// Get all reading progress
+/// </summary>
+/// <param name="userId">The unique identifier for the user</param>
+/// <returns>A list of reading progress</returns>
     [HttpGet("{userId}")]
     public async Task<ActionResult<ReadingProgress>> GetAllReadingProgress(string userId) {
         try {
@@ -27,7 +31,12 @@ public class StatsController : ControllerBase
             return StatusCode(500, $"Error getting reading progress: {ex.Message}");
         }
     }
-
+/// <summary>
+/// Get reading progress by Id
+/// </summary>
+/// <param name="userId"></param>
+/// <param name="progressId"></param>
+/// <returns> A reading progress</returns>
     [HttpGet("{userId}/progress/{progressId}")]
     public async Task<ActionResult<ReadingProgress>> GetReadingProgressById(string userId, string progressId) {
         try {
@@ -40,7 +49,12 @@ public class StatsController : ControllerBase
             return StatusCode(500, $"Error getting reading progress by Id: {ex.Message}");
         }
     }
-
+/// <summary>
+/// Add reading progress
+/// </summary>
+/// <param name="userId"></param>
+/// <param name="readingProgress"></param>
+/// <returns> A newly added reading progress</returns>
     [HttpPost("{userId}/add")]
     public async Task<ActionResult<ReadingProgress>> AddReadingProgress(string userId, ReadingProgress readingProgress) {
         try {
@@ -53,7 +67,13 @@ public class StatsController : ControllerBase
             return StatusCode(500, $"Error adding reading progress: {ex.Message}");
         }
     }
-
+/// <summary>
+/// Update reading progress
+/// </summary>
+/// <param name="userId"></param>
+/// <param name="progressId"></param>
+/// <param name="readingProgress"></param>
+/// <returns> An updated reading progress</returns>
     [HttpPut("{userId}/edit/{progressId}")]
 public async Task<ActionResult<ReadingProgress>> UpdateReadingProgress(string userId, string progressId, [FromBody] ReadingProgress readingProgress) {
     try {
