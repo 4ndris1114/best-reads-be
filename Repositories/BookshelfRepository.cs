@@ -7,11 +7,13 @@ namespace BestReads.Repositories;
 
 public class BookshelfRepository {
     private readonly IMongoCollection<User> _users;
+    private readonly IMongoCollection<Book> _books;
     private readonly ILogger<BookshelfRepository> _logger;
 
     public BookshelfRepository(MongoDbContext dbContext, ILogger<BookshelfRepository> logger) {
         _logger = logger;
         _users = dbContext.Database.GetCollection<User>("users");
+         _books = dbContext.Database.GetCollection<Book>("books");
     }
 
     // Get all bookshelves
@@ -91,19 +93,58 @@ public class BookshelfRepository {
 
     // Add a book to a bookshelf - can optionally take session in case of transaction (from moveBook method)
     public async Task<bool> AddBookToBookshelfAsync(string userId, string shelfId, string bookId, IClientSessionHandle? session = null) {
-        var filter = Builders<User>.Filter.And(
-            Builders<User>.Filter.Eq(u => u.Id, userId),
-            Builders<User>.Filter.ElemMatch(u => u.Bookshelves, b => b.Id == shelfId)
-        );
+    var filter = Builders<User>.Filter.And(
+        Builders<User>.Filter.Eq(u => u.Id, userId),
+        Builders<User>.Filter.ElemMatch(u => u.Bookshelves, b => b.Id == shelfId)
+    );
 
-        var update = Builders<User>.Update.Push("Bookshelves.$.Books", new BookshelfBook { Id = bookId });
+    var update = Builders<User>.Update.Push("Bookshelves.$.Books", bookId);
 
-        UpdateResult result = session != null
-            ? await _users.UpdateOneAsync(session, filter, update)
-            : await _users.UpdateOneAsync(filter, update);
+    var updateResult = session != null
+        ? await _users.UpdateOneAsync(session, filter, update)
+        : await _users.UpdateOneAsync(filter, update);
 
-        return result.MatchedCount > 0 && result.ModifiedCount > 0;
+    if (updateResult.MatchedCount == 0 || updateResult.ModifiedCount == 0)
+        return false;
+
+    // Load user and bookshelf to determine if we should add reading progress
+    var user = await _users.Find(u => u.Id == userId).FirstOrDefaultAsync();
+    var shelf = user.Bookshelves?.FirstOrDefault(b => b.Id == shelfId);
+
+    if (shelf != null && shelf.Name == "Currently reading")
+    {
+        // Prevent duplicate progress entries
+        var alreadyExists = user.ReadingProgress?.Any(rp => rp.BookId == bookId);
+        if (!alreadyExists ?? true)
+        {
+            // Fetch book info to get total pages
+            var book = await _books.Find(b => b.Id == bookId).FirstOrDefaultAsync();
+            if (book == null) return false;
+
+            var newProgress = new
+            {
+                _id = ObjectId.GenerateNewId(),
+                bookId = bookId,
+                currentPage = 0,
+                totalPages = book.NumberOfPages,
+                updatedAt = DateTime.UtcNow
+            };
+
+            var progressUpdate = Builders<User>.Update.Push("readingProgress", newProgress);
+
+            if (session != null)
+            {
+                await _users.UpdateOneAsync(session, Builders<User>.Filter.Eq(u => u.Id, userId), progressUpdate);
+            }
+            else
+            {
+                await _users.UpdateOneAsync(Builders<User>.Filter.Eq(u => u.Id, userId), progressUpdate);
+            }
+        }
     }
+
+    return true;
+}
 
     // Remove a book from a bookshelf - can optionally take session in case of transaction (from moveBook method)
     public async Task RemoveBookFromBookshelfAsync(string userId, string shelfId, string bookId, IClientSessionHandle? session = null) {

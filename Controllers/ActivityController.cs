@@ -17,7 +17,12 @@ public class ActivityController : ControllerBase {
         _activityRepository = activityRepository;
         _userRepository = userRepository;
     }
-
+/// <summary>
+/// Get the user's activity feed.
+/// </summary>
+/// <param name="skip"></param>
+/// <param name="limit"></param>
+/// <returns> A list of user's activities</returns>
     [HttpGet("feed")]
     [Authorize]
     public async Task<IActionResult> GetActivityFeed([FromQuery] int skip = 0, [FromQuery] int limit = 20) {

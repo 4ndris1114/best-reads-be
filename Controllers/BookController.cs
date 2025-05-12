@@ -22,7 +22,7 @@ public class BookController : BaseController<Book> {
     }
 // GET: api/book/
 /// <summary>
-    /// Get all books
+    /// Get all books.
     /// </summary>
     /// <returns>A list of books</returns>
 
@@ -36,7 +36,7 @@ public class BookController : BaseController<Book> {
         }
     }
 /// <summary>
-/// Get a specific book
+/// Get a specific book by ID.
 /// </summary>
 /// <param name="id">The unique identifier for the book</param>
 /// <returns> A book object</returns>
@@ -53,7 +53,7 @@ public class BookController : BaseController<Book> {
         }
     }
 /// <summary>
-/// Create a new book
+/// Create a new book.
 /// </summary>
 /// <param name="book"> The book object to create</param>
 /// <returns> A newly created book object</returns>
@@ -72,7 +72,7 @@ public class BookController : BaseController<Book> {
     }
 
 /// <summary>
-/// Update an existing book
+/// Update an existing book.
 /// </summary>
 /// <param name="id">A unique identifier for the book</param>
 /// <param name="book">A book object</param>
@@ -97,7 +97,7 @@ public class BookController : BaseController<Book> {
         }
     }
 /// <summary>
-/// Delete a book
+/// Delete a book.
 /// </summary>
 /// <param name="id">A unique identifier for the book</param>
 /// <returns></returns>
@@ -115,7 +115,7 @@ public class BookController : BaseController<Book> {
         }
     }
 /// <summary>
-/// Get books by title
+/// Get books by title.
 /// </summary>
 /// <param name="title">A book title</param>
 /// <returns> A list of books</returns>
@@ -130,7 +130,7 @@ public class BookController : BaseController<Book> {
         }
     }
 /// <summary>
-/// Get books by author
+/// Get books by author.
 /// </summary>
 /// <param name="author">A book author</param>
 /// <returns> A list of books</returns>
