@@ -308,6 +308,16 @@ public class BookshelfController : ControllerBase
             
             if (result) {
                 await _activityService.LogBookAddedToShelfAsync(userId, bookId, book.Title, book.CoverImage, true, sourceShelf.Name, targetShelf.Name);
+                
+                // If it's the "Currently Reading" shelf, add initial reading progress
+                if (targetShelf.Name != null && targetShelf.Name.Equals("Currently Reading", StringComparison.OrdinalIgnoreCase)) {
+                    var readingProgress = new ReadingProgress {
+                        BookId = book.Id,
+                        TotalPages = book.NumberOfPages,
+                        CurrentPage = 0
+                    };
+                    await _statsRepository.AddReadingProgressAsync(userId, readingProgress);
+                }
             }
             return Ok(bookId);
         } catch (Exception ex) {
