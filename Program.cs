@@ -17,6 +17,7 @@ var mongoDbConnectionString = Environment.GetEnvironmentVariable("MONGO_CONNECTI
 builder.Configuration.AddEnvironmentVariables();
 
 builder.Services.AddScoped<ActivityService>();
+builder.Services.AddScoped<CloudinaryService>();
 
 builder.Services.AddControllers();
 

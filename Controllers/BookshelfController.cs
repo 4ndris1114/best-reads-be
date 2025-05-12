@@ -210,7 +210,7 @@ public class BookshelfController : ControllerBase
             }
 
             var bookshelf = await _bookshelfRepository.GetBookshelfByIdAsync(userId, shelfId);
-            if (bookshelf?.Books != null && bookshelf.Books.Contains(bookId)) {
+            if (bookshelf?.Books != null && bookshelf.Books.Any(b => b.Id == bookId)) {
                 return BadRequest($"Book with ID '{bookId}' is already in the bookshelf.");
             }
                  var result = await _bookshelfRepository.AddBookToBookshelfAsync(userId, shelfId, bookId);
@@ -254,7 +254,7 @@ public class BookshelfController : ControllerBase
                 return BadRequest($"Missing or invalid required parameter: {missing}");
             }
             var bookShelf = await _bookshelfRepository.GetBookshelfByIdAsync(userId, shelfId);
-            if (bookShelf?.Books != null && !bookShelf.Books.Contains(bookId))
+            if (bookShelf?.Books != null && !bookShelf.Books.Any(b => b.Id == bookId))
             {
                 return Conflict($"Book with ID {bookId} is not part of bookshelf {shelfId}.");
             }
@@ -296,11 +296,11 @@ public class BookshelfController : ControllerBase
 
             var sourceShelf = await _bookshelfRepository.GetBookshelfByIdAsync(userId, sourceShelfId);
             var targetShelf = await _bookshelfRepository.GetBookshelfByIdAsync(userId, targetShelfId);
-            if (sourceShelf?.Books != null && !sourceShelf.Books.Contains(bookId))
+            if (sourceShelf?.Books != null && !sourceShelf.Books.Any(b => b.Id == bookId))
             {
                 return Conflict($"Book with ID {bookId} is not part of bookshelf {sourceShelfId}.");
             }
-            if (targetShelf?.Books != null && targetShelf.Books.Contains(bookId))
+            if (targetShelf?.Books != null && targetShelf.Books.Any(b => b.Id == bookId))
             {
                 return Conflict($"Book with ID {bookId} is already in bookshelf {targetShelfId}.");
             }
