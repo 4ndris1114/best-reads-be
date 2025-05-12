@@ -15,7 +15,7 @@ public class StatsController : ControllerBase
         _statsRepository = statsRepository;
     }
 /// <summary>
-/// Get all reading progress
+/// Get all reading progress.
 /// </summary>
 /// <param name="userId">The unique identifier for the user</param>
 /// <returns>A list of reading progress</returns>
@@ -32,7 +32,7 @@ public class StatsController : ControllerBase
         }
     }
 /// <summary>
-/// Get reading progress by Id
+/// Get reading progress by ID.
 /// </summary>
 /// <param name="userId"></param>
 /// <param name="progressId"></param>
@@ -50,7 +50,7 @@ public class StatsController : ControllerBase
         }
     }
 /// <summary>
-/// Add reading progress
+/// Add reading progress.
 /// </summary>
 /// <param name="userId"></param>
 /// <param name="readingProgress"></param>
@@ -68,7 +68,7 @@ public class StatsController : ControllerBase
         }
     }
 /// <summary>
-/// Update reading progress
+/// Update reading progress.
 /// </summary>
 /// <param name="userId"></param>
 /// <param name="progressId"></param>

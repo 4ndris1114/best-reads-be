@@ -28,7 +28,7 @@ namespace BestReads.Controllers
 
         // GET: api/review/book/{bookId}
         /// <summary>
-        /// Get all reviews for a specific book
+        /// Get all reviews for a specific book.
         /// </summary>
         /// <param name="bookId">The unique identifier for the book.</param>
         /// <returns>A list of reviews</returns>
@@ -54,7 +54,7 @@ namespace BestReads.Controllers
 
         // POST: api/review/book/{bookId}
         /// <summary>
-        /// Add a review to a specific book
+        /// Add a review to a specific book.
         /// </summary>
         /// <param name="bookId">The unique identifier for the book.</param>
         /// <param name="newReview">The review object to add.</param>
@@ -98,7 +98,7 @@ namespace BestReads.Controllers
 
         // // PUT: api/review/book/{bookId}
         // /// <summary>
-        // /// Update the review of a specific user on a specific book
+        // /// Update the review of a specific user on a specific book.
         // /// </summary>
         // /// <param name="bookId">The unique identifier for the book.</param>
         // /// <param name="updatedReview">The updated review object.</param>
@@ -142,7 +142,7 @@ namespace BestReads.Controllers
 
         // DELETE: api/review/{reviewId}/book/{bookId}
         /// <summary>
-        /// Remove the review of a specific book
+        /// Remove the review of a specific book.
         /// </summary>
         /// <param name="bookId">The unique identifier for the book.</param>
         /// <param name="reviewId">The unique identifier for the review.</param>
@@ -177,7 +177,7 @@ namespace BestReads.Controllers
 
         // GET: api/review/book/{bookId}/average
         /// <summary>
-        /// Get the average review for a specific book
+        /// Get the average review for a specific book.
         /// </summary>
         /// <param name="bookId">The unique identifier for the book.</param>
         /// <returns></returns>
@@ -205,7 +205,12 @@ namespace BestReads.Controllers
                 return StatusCode(500, "An error occurred while retrieving the average review.");
             }
         }
-
+/// <summary>
+/// Validate inputs.
+/// </summary>
+/// <param name="missingParam"></param>
+/// <param name="inputs"></param>
+/// <returns></returns>
         private bool ValidateInputs(out string? missingParam, params (string? Value, string Name)[] inputs)
         {
             foreach (var (value, name) in inputs)

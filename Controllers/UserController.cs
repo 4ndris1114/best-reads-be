@@ -16,7 +16,7 @@ public class UserController : ControllerBase
         _userRepository = userRepository;
     }
 /// <summary>
-/// Get a specific user
+/// Get a specific user by ID.
 /// </summary>
 /// <param name="id">The unique identifier for the user</param>
 /// <returns>A user object</returns>
@@ -34,7 +34,7 @@ public class UserController : ControllerBase
     }
 
 /// <summary>
-/// Get multiple users by their ids
+/// Get multiple users by their ids.
 /// </summary>
 /// <param name="ids">A comma-separated list of user ids</param>
 /// <returns>A list of user objects</returns>
@@ -50,7 +50,7 @@ public class UserController : ControllerBase
     }
 
 /// <summary>
-/// Update a specific user
+/// Update a specific user.
 /// </summary>
 /// <param name="id">The unique identifier for the user</param>
 /// <param name="user">The user object to update</param>
@@ -69,7 +69,7 @@ public class UserController : ControllerBase
     }
 
 /// <summary>
-/// Follow a specific user
+/// Follow a specific user.
 /// </summary>
 /// <param name="id">The unique identifier for the user</param>
 /// <param name="friendId">The unique identifier for the friend</param>
@@ -88,7 +88,7 @@ public class UserController : ControllerBase
     }
 
 /// <summary>
-/// Unfollow a specific user
+/// Unfollow a specific user.
 /// </summary>
 /// <param name="id">The unique identifier for the user</param>
 /// <param name="friendId">The unique identifier for the friend</param>
@@ -107,7 +107,7 @@ public class UserController : ControllerBase
     }
 
     /// <summary>
-    /// Search for users by username
+    /// Search for users by username.
     /// </summary>
     /// <param name="query">The username to search for</param>
     /// <returns>A list of users</returns>
