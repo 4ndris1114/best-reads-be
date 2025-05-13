@@ -93,4 +93,28 @@ public class ActivityRepository : BaseRepository<Activity>{
 
         throw new Exception("Unsupported activity type or payload");
     }
+
+    public async Task<bool> AddLikeToActivityAsync(string activityId, string userId) {
+        try {
+            var filter = Builders<Activity>.Filter.Eq(a => a.Id, activityId);
+            var update = Builders<Activity>.Update.AddToSet(a => a.Likes, userId);
+
+            var result = await getCollection().UpdateOneAsync(filter, update);
+            return result.ModifiedCount > 0;
+        } catch (Exception ex) {
+            throw new Exception($"Error adding like to activity {activityId} by user {userId}", ex);
+        }
+    }
+
+    public async Task<bool> RemoveLikeFromActivityAsync(string activityId, string userId) {
+        try {
+            var filter = Builders<Activity>.Filter.Eq(a => a.Id, activityId);
+            var update = Builders<Activity>.Update.Pull(a => a.Likes, userId);
+
+            var result = await getCollection().UpdateOneAsync(filter, update);
+            return result.ModifiedCount > 0;
+        } catch (Exception ex) {
+            throw new Exception($"Error removing like from activity {activityId} by user {userId}", ex);
+        }
+    }
 }
