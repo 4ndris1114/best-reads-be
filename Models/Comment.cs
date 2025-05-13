@@ -13,7 +13,7 @@ public class Comment {
     [BsonElement("userId")]
     public string? UserId { get; set; }
 
-    [BsonElement("Content")]
+    [BsonElement("content")]
     public string? Content { get; set; }
 
     [BsonElement("createdAt")]
