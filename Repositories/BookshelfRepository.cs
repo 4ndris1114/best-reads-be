@@ -98,8 +98,10 @@ public class BookshelfRepository {
         Builders<User>.Filter.ElemMatch(u => u.Bookshelves, b => b.Id == shelfId)
     );
 
-    var update = Builders<User>.Update.Push("Bookshelves.$.Books", bookId);
-
+    var update = Builders<User>.Update.Push("Bookshelves.$.Books", new BookshelfBook {
+        Id = bookId,
+        UpdatedAt = DateTime.UtcNow
+    });
     var updateResult = session != null
         ? await _users.UpdateOneAsync(session, filter, update)
         : await _users.UpdateOneAsync(filter, update);
