@@ -18,6 +18,7 @@ builder.Configuration.AddEnvironmentVariables();
 
 builder.Services.AddScoped<ActivityService>();
 builder.Services.AddScoped<CloudinaryService>();
+builder.Services.AddScoped<BookService>();
 
 builder.Services.AddControllers();
 

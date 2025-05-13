@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using BestReads.Models;
 using BestReads.Models.DTOs;
 using BestReads.Repositories;
+using BestReads.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -14,13 +15,14 @@ namespace BestReads.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 public class BookController : BaseController<Book> {
-
+    private readonly BookService _bookService;
     private readonly BookRepository _bookRepository;
     private readonly ILogger<BookController> _logger;
 
-    public BookController(BookRepository bookRepository, ILogger<BookController> logger)
+    public BookController(BookRepository bookRepository, BookService bookService, ILogger<BookController> logger)
         : base(bookRepository) {
         _bookRepository = bookRepository;
+        _bookService = bookService;
         _logger = logger;
     }
 // GET: api/book/
@@ -62,60 +64,15 @@ public class BookController : BaseController<Book> {
     /// <param name="query">The search query for the book</param>
     /// <returns>A book object</returns>
     [HttpGet("search/{query}")]
-    public async Task<Book?> SearchAndAddFromOpenLibraryAsync(string query) {
-        using var httpClient = new HttpClient();
-        var searchUrl = $"https://openlibrary.org/search.json?title={Uri.EscapeDataString(query)}&limit=1";
-
-        var searchResponse = await httpClient.GetAsync(searchUrl);
-        if (!searchResponse.IsSuccessStatusCode) return null;
-
-        var searchJson = await searchResponse.Content.ReadAsStringAsync();
-        var searchData = JsonSerializer.Deserialize<OpenLibrarySearchResponse>(searchJson);
-
-        var doc = searchData?.Docs.FirstOrDefault();
-        if (doc == null) return null;
-
-        var workKey = doc.WorkKey.Replace("/works/", "");
-        var editionKey = doc.CoverEditionKey;
-
-        var workDetails = await GetJsonAsync<WorkDetails>($"https://openlibrary.org/works/{workKey}.json", httpClient);
-        var editionDetails = await GetJsonAsync<EditionDetails>($"https://openlibrary.org/books/{editionKey}.json", httpClient);
-
-        // Parse description which might be string or object { value: "" }
-        string description = "";
-
-        if (workDetails?.Description is JsonElement descElement) {
-            if (descElement.ValueKind == JsonValueKind.String) {
-                description = descElement.GetString() ?? "";
-            }
-            else if (descElement.ValueKind == JsonValueKind.Object &&
-                    descElement.TryGetProperty("value", out var val)) {
-                description = val.GetString() ?? "";
-            }
+    public async Task<ActionResult<Book>> SearchAndAddFromOpenLibraryAsync(string query) {
+        try {
+            var book = await _bookService.SearchAndAddFromOpenLibraryAsync(query);
+            return book == null ? NotFound("Book not found") : Ok(book);
         }
-
-        var publishedDate = TryParseDate(editionDetails?.PublishDate);
-        var coverImage = editionDetails?.Covers?.FirstOrDefault() is int coverId
-            ? $"https://covers.openlibrary.org/b/id/{coverId}-L.jpg"
-            : "";
-
-        var book = new Book {
-            ApiId = workKey,
-            Title = doc.Title,
-            Author = doc.AuthorName.FirstOrDefault() ?? "Unknown",
-            Description = ExtractDescription(workDetails.Description),
-            Genres = ExtractSubjects(workDetails),
-            NumberOfPages = editionDetails?.NumberOfPages ?? 0,
-            Isbn = editionDetails?.Isbn13?.FirstOrDefault() ?? editionDetails?.Isbn10?.FirstOrDefault() ?? "",
-            PublishedDate = publishedDate,
-            CoverImage = coverImage,
-            Reviews = new(),
-            AverageRating = 0
-        };
-
-        // Save to MongoDB here
-        await _bookRepository.CreateAsync(book); // or your insert method
-        return book;
+        catch (Exception ex) {
+            _logger.LogError(ex, $"Error searching for book with query {query}");
+            return StatusCode(500, $"Error searching for book with query {query}");
+        }
     }
 
 /// <summary>
