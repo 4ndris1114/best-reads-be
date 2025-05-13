@@ -34,4 +34,32 @@ public class ActivityController : ControllerBase {
 
         return Ok(activities);
     }
+
+    [HttpPut("{activityId}/like")]
+    [Authorize]
+    public async Task<ActionResult<bool>> LikeActivity(string activityId) {
+        try {
+            var userId = User.FindFirstValue("userId");
+            if (userId == null)
+                return Unauthorized();
+            var liked = await _activityRepository.AddLikeToActivityAsync(activityId, userId);
+            return Ok(liked);
+        } catch (Exception ex) {
+            return StatusCode(500, $"Error liking activity: {ex.Message}");
+        }
+    }
+
+    [HttpPut("{activityId}/unlike")]
+    [Authorize]
+    public async Task<ActionResult<bool>> UnlikeActivity(string activityId) {
+        try {
+            var userId = User.FindFirstValue("userId");
+            if (userId == null)
+                return Unauthorized();
+            var unliked = await _activityRepository.RemoveLikeFromActivityAsync(activityId, userId);
+            return Ok(unliked);
+        } catch (Exception ex) {
+            return StatusCode(500, $"Error unliking activity: {ex.Message}");
+        }
+    }
 }
