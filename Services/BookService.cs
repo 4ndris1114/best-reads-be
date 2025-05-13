@@ -6,15 +6,28 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 
+using CloudinaryDotNet;
+using CloudinaryDotNet.Actions;
+using System.IO;
+
 namespace BestReads.Services;
 
 public class BookService {
     private readonly HttpClient _httpClient;
     private readonly BookRepository _bookRepository;
+    private readonly Cloudinary _cloudinary;
 
     public BookService(BookRepository bookRepository) {
         _httpClient = new HttpClient();
         _bookRepository = bookRepository;
+
+        // Initialize Cloudinary
+        var cloudinaryAccount = new Account(
+            Environment.GetEnvironmentVariable("CLOUDINARY_CLOUD_NAME"),
+            Environment.GetEnvironmentVariable("CLOUDINARY_API_KEY"),
+            Environment.GetEnvironmentVariable("CLOUDINARY_API_SECRET")
+        );
+        _cloudinary = new Cloudinary(cloudinaryAccount);
     }
 
     public async Task<Book?> SearchAndAddFromOpenLibraryAsync(string query) {
@@ -45,9 +58,7 @@ public class BookService {
                 NumberOfPages = editionDetails?.NumberOfPages ?? 0,
                 Isbn = editionDetails?.Isbn13?.FirstOrDefault() ?? editionDetails?.Isbn10?.FirstOrDefault() ?? "",
                 PublishedDate = TryParseDate(editionDetails?.PublishDate),
-                CoverImage = editionDetails?.Covers?.FirstOrDefault() is int coverId
-                    ? $"https://covers.openlibrary.org/b/id/{coverId}-L.jpg"
-                    : "",
+                CoverImage = await UploadCoverImageToCloudinary(editionDetails?.Covers?.FirstOrDefault()),
                 Reviews = new(),
                 AverageRating = 0
             };
@@ -60,6 +71,21 @@ public class BookService {
         }
     }
 
+    private async Task<string> UploadCoverImageToCloudinary(int? coverId) {
+        if (!coverId.HasValue) return "";
+
+        var coverUrl = $"https://covers.openlibrary.org/b/id/{coverId.Value}-L.jpg";
+        var coverImageStream = await _httpClient.GetStreamAsync(coverUrl);
+
+        // Upload to Cloudinary
+        var uploadParams = new ImageUploadParams {
+            File = new FileDescription("cover.jpg", coverImageStream)
+        };
+        var uploadResult = await _cloudinary.UploadAsync(uploadParams);
+
+        return uploadResult?.SecureUrl?.ToString().Split('/').Last() ?? "";
+    }
+    
     private async Task<T?> GetJsonAsync<T>(string url) {
         var res = await _httpClient.GetAsync(url);
         if (!res.IsSuccessStatusCode) return default;
@@ -101,23 +127,17 @@ public class BookService {
         if (string.IsNullOrWhiteSpace(rawDescription))
             return "";
 
-        // 1. Remove markdown-style links: [Text][1]
         rawDescription = Regex.Replace(rawDescription, @"\[[^\]]+\]\[\d+\]", "");
-
-        // 2. Remove numbered reference definitions: [1]: http...
         rawDescription = Regex.Replace(rawDescription, @"\[\d+\]:\s*https?:\/\/\S+\r?\n?", "");
-
-        // 3. Remove HTML-style entities and escape sequences like \r, \n, \t
         rawDescription = rawDescription
             .Replace("\\r", " ")
             .Replace("\\n", " ")
             .Replace("\r", " ")
             .Replace("\n", " ")
             .Replace("\t", " ");
-
-        // 4. Normalize all whitespace (multiple spaces → single space)
         rawDescription = Regex.Replace(rawDescription, @"\s{2,}", " ").Trim();
 
         return rawDescription;
     }
 }
+
