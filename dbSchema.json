@@ -41,6 +41,7 @@
         {
           "userId": ObjectId,
           "ratingValue": Number,
+
           "review": String,
           "createdAt": Date,
           "updatedAt": Date

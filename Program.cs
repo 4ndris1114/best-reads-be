@@ -95,6 +95,8 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.AddAuthorization();  // To use authorization
 
+//TODO: add auth
+
 var app = builder.Build();
 
 app.UseCors("AllowSpecificOrigin");
@@ -117,4 +119,5 @@ app.MapControllers();
 app.MapHub<ActivityHub>("/hubs/activity");
 
 Console.WriteLine("Starting application...");
+
 app.Run();
