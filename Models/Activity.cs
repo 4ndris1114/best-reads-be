@@ -25,7 +25,14 @@ public class Activity {
     [BsonElement("bookId")]
     public string? BookId { get; set; }
 
+    [BsonElement("payload")]
     public object Payload { get; set; }
+
+    [BsonElement("likes")]
+    public List<string> Likes { get; set; } = new List<string>();
+
+    [BsonElement("comments")]
+    public List<Comment> Comments { get; set; } = new List<Comment>();
 
     public enum ActivityType {
         AddedBookToShelf,

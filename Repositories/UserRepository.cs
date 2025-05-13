@@ -82,8 +82,7 @@ public class UserRepository : BaseRepository<User> {
 
             // Optional: return the updated user
             return await _users.Find(u => u.Id == friendId).FirstOrDefaultAsync();
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             await session.AbortTransactionAsync();
             throw new Exception("Transaction failed while following user", ex);
         }
