@@ -82,7 +82,7 @@ public class StatsRepository
             var currentlyReadingShelf = user.Bookshelves.FirstOrDefault(s => s.Name == "Currently Reading");
             var readShelf = user.Bookshelves.FirstOrDefault(s => s.Name == "Read");
 
-            if (currentlyReadingShelf != null && readShelf != null && currentlyReadingShelf.Books.Contains(readingProgress.BookId)) {
+            if (currentlyReadingShelf != null && readShelf != null && currentlyReadingShelf.Books.Any(b => b.Id == readingProgress.BookId)) {
                 // Remove from Currently Reading
                 var removeFilter = Builders<User>.Filter.Eq(u => u.Id, userId);
                 var removeUpdate = Builders<User>.Update.Pull("Bookshelves.$[s].Books", readingProgress.BookId);
