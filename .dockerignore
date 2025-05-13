@@ -1,0 +1,23 @@
+# Ignore .NET build artifacts
+bin/
+obj/
+*.user
+*.suo
+
+# Ignore logs and temp files
+*.log
+*.tmp
+*.DS_Store
+.vs/
+
+# Ignore environment files (they should be set via Render)
+.env
+.env.*
+
+# Ignore Git-related files
+.git
+.gitignore
+
+# Ignore Docker-specific files you don't want copied
+Dockerfile*
+docker-compose.*
