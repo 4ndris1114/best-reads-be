@@ -13,7 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 Env.Load();
 
-var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+var port = Environment.GetEnvironmentVariable("PORT") ?? "5071";
 builder.WebHost.UseUrls($"http://*:{port}");
 
 var mongoDbConnectionString = Environment.GetEnvironmentVariable("MONGO_CONNECTION_STRING")!
