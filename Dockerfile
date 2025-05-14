@@ -10,20 +10,20 @@ WORKDIR /src
 
 # Copy and restore
 COPY ["BEST-READS-BE.csproj", "./"]
-RUN dotnet restore "BEST-READS-BE.csproj"
+RUN dotnet restore "best-reads-be.csproj"
 
 # Copy everything and build
 COPY . .
 
 WORKDIR "/src"
-RUN dotnet build "BEST-READS-BE.csproj" -c Release -o /app/build
+RUN dotnet build "best-reads-be.csproj" -c Release -o /app/build
 
 # Publish stage
 FROM build AS publish
-RUN dotnet publish "BEST-READS-BE.csproj" -c Release -o /app/publish
+RUN dotnet publish "best-reads-be.csproj" -c Release -o /app/publish
 
 # Final runtime image
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "BEST-READS-BE.dll"]
+ENTRYPOINT ["dotnet", "best-reads-be.dll"]
