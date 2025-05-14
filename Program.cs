@@ -14,7 +14,10 @@ var builder = WebApplication.CreateBuilder(args);
 Env.Load();
 
 var port = Environment.GetEnvironmentVariable("PORT") ?? "5071";
-builder.WebHost.UseUrls($"http://*:{port}");
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.Listen(System.Net.IPAddress.Any, int.Parse(port));
+});
 
 var mongoDbConnectionString = Environment.GetEnvironmentVariable("MONGO_CONNECTION_STRING")!
     ?? throw new Exception("MONGO_CONNECTION_STRING environment variable not found");
