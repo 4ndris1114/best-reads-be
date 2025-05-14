@@ -59,7 +59,7 @@ public class BookController : BaseController<Book> {
         }
     }
 
-    [HttpGet("search")]
+    [HttpGet("search-internal")]
     public async Task<IActionResult> SearchBooks([FromQuery] string query) {
         try {
             var books = await _bookRepository.SearchBooksAsync(query);
@@ -74,16 +74,24 @@ public class BookController : BaseController<Book> {
     /// Fetch a book from the OpenLibrary API.
     /// </summary>
     /// <param name="query">The search query for the book</param>
+    /// <param name="type">The type of search to perform (author or title)</param>
     /// <returns>A book object</returns>
-    [HttpGet("search/{query}")]
-    public async Task<ActionResult<Book>> SearchAndAddFromOpenLibrary(string query) {
+    [HttpGet("search-external")]
+    public async Task<IActionResult> SearchAndAddFromOpenLibrary([FromQuery] string query, [FromQuery] string type = "title") {
         try {
-            var book = await _bookService.SearchAndAddFromOpenLibraryAsync(query);
-            return book == null ? NotFound("Book not found") : Ok(book);
-        }
-        catch (Exception ex) {
-            _logger.LogError(ex, $"Error searching for book with query {query}");
-            return StatusCode(500, $"Error searching for book with query {query}");
+            switch (type.ToLower()) {
+                case "author":
+                    var books = await _bookService.SearchAndAddByAuthorFromOpenLibraryAsync(query);
+                    return books == null || books.Count == 0 ? NotFound("No books found by author") : Ok(books);
+
+                case "title":
+                default:
+                    var book = await _bookService.SearchAndAddByTitleFromOpenLibraryAsync(query);
+                    return book == null ? NotFound("Book not found") : Ok(new[] { book });
+            }
+        } catch (Exception ex) {
+            _logger.LogError(ex, $"Error searching for book with query '{query}' and type '{type}'");
+            return StatusCode(500, $"Error searching for book with query '{query}' and type '{type}'");
         }
     }
 

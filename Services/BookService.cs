@@ -29,7 +29,7 @@ public class BookService {
         _cloudinary = new Cloudinary(cloudinaryAccount);
     }
 
-    public async Task<Book?> SearchAndAddFromOpenLibraryAsync(string query) {
+    public async Task<Book?> SearchAndAddByTitleFromOpenLibraryAsync(string query) {
         var searchUrl = $"https://openlibrary.org/search.json?title={Uri.EscapeDataString(query)}&limit=1";
 
         try {
@@ -67,6 +67,55 @@ public class BookService {
         } catch (Exception ex) {
             Console.WriteLine(ex.Message);
             return null;
+        }
+    }
+    public async Task<List<Book>> SearchAndAddByAuthorFromOpenLibraryAsync(string author) {
+        var searchUrl = $"https://openlibrary.org/search.json?author={Uri.EscapeDataString(author)}&limit=5";
+        var result = new List<Book>();
+
+        try {
+            var searchResponse = await _httpClient.GetAsync(searchUrl);
+            if (!searchResponse.IsSuccessStatusCode) return result;
+
+            var searchJson = await searchResponse.Content.ReadAsStringAsync();
+            var searchData = JsonSerializer.Deserialize<OpenLibrarySearchResponse>(searchJson);
+
+            var docs = searchData?.Docs?.Take(5).Where(d => d != null).ToList();
+            if (docs == null || !docs.Any()) return result;
+
+            foreach (var doc in docs) {
+                var workKey = doc.WorkKey?.Replace("/works/", "");
+                var editionKey = doc.CoverEditionKey;
+
+                if (string.IsNullOrEmpty(workKey) || string.IsNullOrEmpty(editionKey))
+                    continue;
+
+                var workDetails = await GetJsonAsync<WorkDetails>($"https://openlibrary.org/works/{workKey}.json");
+                var editionDetails = await GetJsonAsync<EditionDetails>($"https://openlibrary.org/books/{editionKey}.json");
+
+                var book = new Book {
+                    ApiId = workKey,
+                    Title = doc.Title ?? "Unknown",
+                    Author = doc.AuthorName?.FirstOrDefault() ?? "Unknown",
+                    Description = CleanDescription(ExtractDescription(workDetails?.Description)),
+                    Genres = ExtractSubjects(workDetails),
+                    NumberOfPages = editionDetails?.NumberOfPages ?? 0,
+                    Isbn = editionDetails?.Isbn13?.FirstOrDefault() ?? editionDetails?.Isbn10?.FirstOrDefault() ?? "",
+                    PublishedDate = TryParseDate(editionDetails?.PublishDate),
+                    CoverImage = await UploadCoverImageToCloudinary(editionDetails?.Covers?.FirstOrDefault()),
+                    Reviews = new(),
+                    AverageRating = 0
+                };
+
+                await _bookRepository.CreateAsync(book);
+                result.Add(book);
+            }
+
+            return result;
+        }
+        catch (Exception ex) {
+            Console.WriteLine(ex.Message);
+            return result;
         }
     }
 
