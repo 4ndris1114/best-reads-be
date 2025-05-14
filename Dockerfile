@@ -9,7 +9,7 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
 # Copy and restore
-COPY ["BEST-READS-BE.csproj", "./"]
+COPY ["best-reads-be.csproj", "./"]
 RUN dotnet restore "best-reads-be.csproj"
 
 # Copy everything and build
