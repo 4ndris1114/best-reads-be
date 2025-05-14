@@ -70,19 +70,25 @@ public class StatsRepository
                 Builders<User>.Filter.ElemMatch(u => u.ReadingProgress, rp => rp.Id == readingProgress.Id)
             );
 
-            var update = Builders<User>.Update
-                .Set("readingProgress.$.currentPage", readingProgress.CurrentPage)
-                .Set("readingProgress.$.updatedAt", DateTime.UtcNow);
+var user = await _users.Find(u => u.Id == userId).FirstOrDefaultAsync();
+if (user == null || user.ReadingProgress == null) {
+    await session.AbortTransactionAsync();
+    return null;
+}
+
+var index = user.ReadingProgress.FindIndex(rp => rp.Id == readingProgress.Id);
+if (index == -1) {
+    await session.AbortTransactionAsync();
+    return null;
+}
+
+var update = Builders<User>.Update
+    .Set($"readingProgress.{index}.currentPage", readingProgress.CurrentPage)
+    .Set($"readingProgress.{index}.updatedAt", DateTime.UtcNow);
 
             var result = await _users.UpdateOneAsync(session, filter, update);
 
             if (result.ModifiedCount > 0 && readingProgress.CurrentPage == readingProgress.TotalPages) {
-                var user = await _users.Find(session, u => u.Id == userId).FirstOrDefaultAsync();
-                if (user == null) {
-                    await session.AbortTransactionAsync();
-                    return readingProgress;
-                }
-
                 var currentlyReadingShelf = user.Bookshelves!.FirstOrDefault(s => s.Name == "Currently Reading");
                 var readShelf = user.Bookshelves!.FirstOrDefault(s => s.Name == "Read");
 
