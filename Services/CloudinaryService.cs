@@ -23,7 +23,6 @@ public class CloudinaryService {
 
         // Create the parameters dictionary with object type values
         var parameters = new System.Collections.Generic.Dictionary<string, object> {
-            { "folder", "users" },
             { "overwrite", "true" },
             { "public_id", userId },
             { "timestamp", timestamp },

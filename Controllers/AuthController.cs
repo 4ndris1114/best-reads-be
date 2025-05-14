@@ -56,7 +56,7 @@ public class AuthController : ControllerBase {
                 Username = user.Username,
                 Email = user.Email,
                 Password = user.Password,
-                ProfilePicture = "default_profile_picture.jpg",
+                ProfilePicture = "default_profile_picture",
                 Bio = $"{user.Username}'s bio",
                 Bookshelves = new List<Bookshelf> {
                     new Bookshelf { Id = ObjectId.GenerateNewId().ToString(), Name = "Currently Reading", Books = new List<BookshelfBook>(), IsMutable = false },
