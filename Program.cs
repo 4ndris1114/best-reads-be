@@ -110,7 +110,7 @@ var app = builder.Build();
 app.UseCors("AllowSpecificOrigin");
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 {
     app.UseSwagger();
     app.UseSwaggerUI(options =>
@@ -122,6 +122,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseAuthentication(); // Add authentication middleware
 app.UseAuthorization();  // Add authorization middleware
+app.UseDefaultFiles();
+app.UseStaticFiles();
 
 app.MapControllers();
 app.MapHub<ActivityHub>("/hubs/activity");
