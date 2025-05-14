@@ -12,15 +12,18 @@ using BestReads.Hubs;
 var builder = WebApplication.CreateBuilder(args);
 
 Env.Load();
-var mongoDbConnectionString = Environment.GetEnvironmentVariable("MONGO_CONNECTION_STRING")!;
+
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+builder.WebHost.UseUrls($"http://*:{port}");
+
+var mongoDbConnectionString = Environment.GetEnvironmentVariable("MONGO_CONNECTION_STRING")!
+    ?? throw new Exception("MONGO_CONNECTION_STRING environment variable not found");
 
 builder.Configuration.AddEnvironmentVariables();
 
 builder.Services.AddScoped<ActivityService>();
 builder.Services.AddScoped<CloudinaryService>();
-
 builder.Services.AddControllers();
-
 builder.Services.AddSignalR();
 
 // Configure CORS
