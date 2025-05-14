@@ -60,54 +60,66 @@ public class StatsRepository
     }
 
     public async Task<ReadingProgress?> UpdateReadingProgressAsync(string userId, ReadingProgress readingProgress) {
+        using var session = await _users.Database.Client.StartSessionAsync();
+        session.StartTransaction();
+
         try {
-            // Filter to find the user with the given userId
+            // Filter to find the user with the given userId and the specific reading progress entry
             var filter = Builders<User>.Filter.And(
                 Builders<User>.Filter.Eq(u => u.Id, userId),
-                Builders<User>.Filter.ElemMatch(u => u.ReadingProgress, rp => rp.Id == readingProgress.Id) // Match progress by ID
+                Builders<User>.Filter.ElemMatch(u => u.ReadingProgress, rp => rp.Id == readingProgress.Id)
             );
 
             var update = Builders<User>.Update
-                .Set("ReadingProgress.$.CurrentPage", readingProgress.CurrentPage)
-                .Set("ReadingProgress.$.UpdatedAt", DateTime.UtcNow);
-           
-            // Perform the update operation
-            var result = await _users.UpdateOneAsync(filter, update);
+                .Set("readingProgress.$.currentPage", readingProgress.CurrentPage)
+                .Set("readingProgress.$.updatedAt", DateTime.UtcNow);
 
-            // 2. If update was successful and book is finished
-        if (result.ModifiedCount > 0 && readingProgress.CurrentPage == readingProgress.TotalPages) {
-            var user = await _users.Find(u => u.Id == userId).FirstOrDefaultAsync();
-            if (user == null) return readingProgress;
+            var result = await _users.UpdateOneAsync(session, filter, update);
 
-            var currentlyReadingShelf = user.Bookshelves!.FirstOrDefault(s => s.Name == "Currently Reading");
-            var readShelf = user.Bookshelves!.FirstOrDefault(s => s.Name == "Read");
+            if (result.ModifiedCount > 0 && readingProgress.CurrentPage == readingProgress.TotalPages) {
+                var user = await _users.Find(session, u => u.Id == userId).FirstOrDefaultAsync();
+                if (user == null) {
+                    await session.AbortTransactionAsync();
+                    return readingProgress;
+                }
 
-            if (currentlyReadingShelf != null && readShelf != null && currentlyReadingShelf.Books!.Any(b => b.Id == readingProgress.BookId)) {
-                // Remove from Currently Reading
-                var removeFilter = Builders<User>.Filter.Eq(u => u.Id, userId);
-                var removeUpdate = Builders<User>.Update.Pull("Bookshelves.$[s].Books", readingProgress.BookId);
-                var removeOptions = new UpdateOptions {
-                    ArrayFilters = new List<ArrayFilterDefinition> {
-                        new JsonArrayFilterDefinition<BsonDocument>("{ 's.Name': 'Currently Reading' }")
-                    }
-                };
-                await _users.UpdateOneAsync(removeFilter, removeUpdate, removeOptions);
+                var currentlyReadingShelf = user.Bookshelves!.FirstOrDefault(s => s.Name == "Currently Reading");
+                var readShelf = user.Bookshelves!.FirstOrDefault(s => s.Name == "Read");
 
-                // Add to Read
-                var addUpdate = Builders<User>.Update.Push("Bookshelves.$[s].Books", readingProgress.BookId);
-                var addOptions = new UpdateOptions {
-                    ArrayFilters = new List<ArrayFilterDefinition> {
-                        new JsonArrayFilterDefinition<BsonDocument>("{ 's.Name': 'Read' }")
-                    }
-                };
-                await _users.UpdateOneAsync(removeFilter, addUpdate, addOptions);
+                if (currentlyReadingShelf != null && readShelf != null &&
+                    currentlyReadingShelf.Books!.Any(b => b.Id == readingProgress.BookId)) {
+
+                    var removeFilter = Builders<User>.Filter.Eq(u => u.Id, userId);
+                    var removeUpdate = Builders<User>.Update.PullFilter("bookshelves.$[s].books",
+                        Builders<BookshelfBook>.Filter.Eq(b => b.Id, readingProgress.BookId));
+                    var removeOptions = new UpdateOptions {
+                        ArrayFilters = new List<ArrayFilterDefinition> {
+                            new JsonArrayFilterDefinition<BsonDocument>("{ 's.name': 'Currently Reading' }")
+                        }
+                    };
+                    await _users.UpdateOneAsync(session, removeFilter, removeUpdate, removeOptions);
+
+                    var addUpdate = Builders<User>.Update.Push("bookshelves.$[s].books", new BookshelfBook {
+                        Id = readingProgress.BookId,
+                        UpdatedAt = DateTime.UtcNow
+                    });
+                    var addOptions = new UpdateOptions {
+                        ArrayFilters = new List<ArrayFilterDefinition> {
+                            new JsonArrayFilterDefinition<BsonDocument>("{ 's.name': 'Read' }")
+                        }
+                    };
+                    await _users.UpdateOneAsync(session, removeFilter, addUpdate, addOptions);
+                }
+
+                await session.CommitTransactionAsync();
+                return readingProgress;
             }
-            return readingProgress;
-        }
 
-        return result.ModifiedCount > 0 ? readingProgress : null;
-    } catch (Exception ex) {
-        throw new Exception($"Error updating reading progress: {ex.Message}");
-    }
+            await session.CommitTransactionAsync();
+            return result.ModifiedCount > 0 ? readingProgress : null;
+        } catch (Exception ex) {
+            await session.AbortTransactionAsync();
+            throw new Exception($"Error updating reading progress: {ex.Message}");
+        }
     }
 }
