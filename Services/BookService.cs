@@ -2,7 +2,6 @@ using System.Text.Json;
 using BestReads.Models;
 using BestReads.Models.DTOs;
 using BestReads.Repositories;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 
@@ -43,16 +42,16 @@ public class BookService {
             var doc = searchData?.Docs.FirstOrDefault();
             if (doc == null) return null;
 
-            var workKey = doc.WorkKey.Replace("/works/", "");
+            var workKey = doc.WorkKey?.Replace("/works/", "");
             var editionKey = doc.CoverEditionKey;
 
             var workDetails = await GetJsonAsync<WorkDetails>($"https://openlibrary.org/works/{workKey}.json");
             var editionDetails = await GetJsonAsync<EditionDetails>($"https://openlibrary.org/books/{editionKey}.json");
 
             var book = new Book {
-                ApiId = workKey,
-                Title = doc.Title,
-                Author = doc.AuthorName.FirstOrDefault() ?? "Unknown",
+                ApiId = workKey!,
+                Title = doc.Title!,
+                Author = doc.AuthorName!.FirstOrDefault() ?? "Unknown",
                 Description = CleanDescription(ExtractDescription(workDetails?.Description)),
                 Genres = ExtractSubjects(workDetails),
                 NumberOfPages = editionDetails?.NumberOfPages ?? 0,

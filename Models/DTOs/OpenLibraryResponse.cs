@@ -10,19 +10,19 @@ public class OpenLibrarySearchResponse {
 
 public class OpenLibrarySearchDoc {
     [JsonPropertyName("key")]
-    public string WorkKey { get; set; }
+    public string? WorkKey { get; set; }
 
     [JsonPropertyName("title")]
-    public string Title { get; set; }
+    public string? Title { get; set; }
 
     [JsonPropertyName("author_name")]
-    public List<string> AuthorName { get; set; } = new();
+    public List<string?> AuthorName { get; set; } = new();
 
     [JsonPropertyName("first_publish_year")]
     public int? FirstPublishYear { get; set; }
 
     [JsonPropertyName("cover_edition_key")]
-    public string CoverEditionKey { get; set; } = string.Empty;
+    public string? CoverEditionKey { get; set; } = string.Empty;
 }
 
 public class WorkDetails {
