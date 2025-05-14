@@ -37,7 +37,7 @@ public class ActivityController : ControllerBase {
         if (user == null)
             return NotFound();
 
-        var activities = await _activityRepository.GetRecentActivitiesAsync(user.Following, skip, limit);
+        var activities = await _activityRepository.GetRecentActivitiesAsync(user.Following!, skip, limit);
 
         return Ok(activities);
     }

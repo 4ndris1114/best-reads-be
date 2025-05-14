@@ -3,7 +3,7 @@ using MongoDB.Bson.Serialization.Attributes;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-namespace BestReads.Models;
+namespace BestReads.Models.DTOs;
 
 public class UpdateUserDTO {
     [BsonId]

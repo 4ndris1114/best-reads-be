@@ -216,10 +216,10 @@ public class BookshelfController : ControllerBase
                  var result = await _bookshelfRepository.AddBookToBookshelfAsync(userId, shelfId, bookId);
 
         if (result) {
-            await _activityService.LogBookAddedToShelfAsync(userId, bookId, book.Title, book.CoverImage, false, null, bookshelf.Name);
+            await _activityService.LogBookAddedToShelfAsync(userId, bookId, book.Title, book.CoverImage, false, null, bookshelf!.Name!);
 
             // If it's the "Currently Reading" shelf, add initial reading progress
-            if (bookshelf.Name != null && bookshelf.Name.Equals("Currently Reading", StringComparison.OrdinalIgnoreCase)) {
+            if (bookshelf.Name! != null && bookshelf.Name.Equals("Currently Reading", StringComparison.OrdinalIgnoreCase)) {
                 var readingProgress = new ReadingProgress {
                     BookId = book.Id,
                     TotalPages = book.NumberOfPages,
@@ -307,7 +307,7 @@ public class BookshelfController : ControllerBase
             var result = await _bookshelfRepository.MoveBookToAnotherBookshelfAsync(userId, sourceShelfId, bookId, targetShelfId);
             
             if (result) {
-                await _activityService.LogBookAddedToShelfAsync(userId, bookId, book.Title, book.CoverImage, true, sourceShelf.Name, targetShelf.Name);
+                await _activityService.LogBookAddedToShelfAsync(userId, bookId, book.Title, book.CoverImage, true, sourceShelf!.Name, targetShelf!.Name);
                 
                 // If it's the "Currently Reading" shelf, add initial reading progress
                 if (targetShelf.Name != null && targetShelf.Name.Equals("Currently Reading", StringComparison.OrdinalIgnoreCase)) {

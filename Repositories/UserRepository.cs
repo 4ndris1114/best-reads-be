@@ -1,4 +1,5 @@
 using BestReads.Models;
+using BestReads.Models.DTOs;
 using BestReads.Database;
 using MongoDB.Driver;
 using MongoDB.Bson;

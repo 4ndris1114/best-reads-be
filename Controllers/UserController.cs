@@ -1,6 +1,7 @@
 using BestReads.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using BestReads.Models;
+using BestReads.Models.DTOs;
 
 namespace BestReads.Controllers;
 

@@ -26,7 +26,7 @@ public class Activity {
     public string? BookId { get; set; }
 
     [BsonElement("payload")]
-    public object Payload { get; set; }
+    public object Payload { get; set; } = new object();
 
     [BsonElement("likes")]
     public List<string> Likes { get; set; } = new List<string>();

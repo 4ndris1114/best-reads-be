@@ -12,7 +12,7 @@ namespace BestReads.Repositories;
 public class ActivityRepository : BaseRepository<Activity>{
     public ActivityRepository(MongoDbContext context) : base(context, "activities") { }
 
-    public async Task<List<Activity>> GetRecentActivitiesAsync(IEnumerable<string> followingUserIds, int skip = 0, int limit = 20) {
+    public async Task<List<Activity>> GetRecentActivitiesAsync(IEnumerable<string?> followingUserIds, int skip = 0, int limit = 20) {
         var filter = Builders<Activity>.Filter.In(a => a.UserId, followingUserIds);
         var sort = Builders<Activity>.Sort.Descending(a => a.CreatedAt);
 
@@ -118,13 +118,13 @@ public class ActivityRepository : BaseRepository<Activity>{
         }
     }
 
-    public async Task<Comment> AddCommentToActivityAsync(string activityId, string userId, Comment comment) {
+    public async Task<Comment?> AddCommentToActivityAsync(string activityId, string userId, Comment comment) {
         try {
             var filter = Builders<Activity>.Filter.Eq(a => a.Id, activityId);
             var update = Builders<Activity>.Update.AddToSet(a => a.Comments, comment);
             var result = await getCollection().UpdateOneAsync(filter, update);
 
-            return result.ModifiedCount > 0 ? comment : null;
+            return result!.ModifiedCount > 0 ? comment : null;
         } catch (Exception ex) {
             throw new Exception($"Error adding comment to activity {activityId} by user {userId}", ex);
         }
