@@ -12,7 +12,15 @@ using BestReads.Hubs;
 var builder = WebApplication.CreateBuilder(args);
 
 Env.Load();
-var mongoDbConnectionString = Environment.GetEnvironmentVariable("MONGO_CONNECTION_STRING")!;
+
+var port = Environment.GetEnvironmentVariable("PORT") ?? "5071";
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.Listen(System.Net.IPAddress.Any, int.Parse(port));
+});
+
+var mongoDbConnectionString = Environment.GetEnvironmentVariable("MONGO_CONNECTION_STRING")!
+    ?? throw new Exception("MONGO_CONNECTION_STRING environment variable not found");
 
 builder.Configuration.AddEnvironmentVariables();
 
@@ -21,7 +29,6 @@ builder.Services.AddScoped<CloudinaryService>();
 builder.Services.AddScoped<BookService>();
 
 builder.Services.AddControllers();
-
 builder.Services.AddSignalR();
 
 // Configure CORS
@@ -96,6 +103,8 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.AddAuthorization();  // To use authorization
 
+//TODO: add auth
+
 var app = builder.Build();
 
 app.UseCors("AllowSpecificOrigin");
@@ -118,4 +127,5 @@ app.MapControllers();
 app.MapHub<ActivityHub>("/hubs/activity");
 
 Console.WriteLine("Starting application...");
+
 app.Run();
