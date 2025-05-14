@@ -25,12 +25,12 @@ public class BookController : BaseController<Book> {
         _bookService = bookService;
         _logger = logger;
     }
-// GET: api/book/
-/// <summary>
+
+    // GET: api/book/
+    /// <summary>
     /// Get all books.
     /// </summary>
     /// <returns>A list of books</returns>
-
     public override async Task<ActionResult<IEnumerable<Book>>> GetAll() {
         try {
             var books = await _bookRepository.GetAllAsync();
@@ -40,11 +40,12 @@ public class BookController : BaseController<Book> {
             return StatusCode(500, "Error fetching books");
         }
     }
-/// <summary>
-/// Get a specific book by ID.
-/// </summary>
-/// <param name="id">The unique identifier for the book</param>
-/// <returns> A book object</returns>
+
+    /// <summary>
+    /// Get a specific book by ID.
+    /// </summary>
+    /// <param name="id">The unique identifier for the book</param>
+    /// <returns> A book object</returns>
     public override async Task<ActionResult<Book>> GetById(string id) {
         try {
             if (!ObjectId.TryParse(id, out _))
@@ -58,13 +59,24 @@ public class BookController : BaseController<Book> {
         }
     }
 
+    [HttpGet("search")]
+    public async Task<IActionResult> SearchBooks([FromQuery] string query) {
+        try {
+            var books = await _bookRepository.SearchBooksAsync(query);
+            return Ok(books);
+        } catch (Exception ex) {
+            _logger.LogError(ex, $"Error searching for books with query {query}");
+            return StatusCode(500, $"Error searching for books with query {query}");
+        }
+    }
+
     /// <summary>
     /// Fetch a book from the OpenLibrary API.
     /// </summary>
     /// <param name="query">The search query for the book</param>
     /// <returns>A book object</returns>
     [HttpGet("search/{query}")]
-    public async Task<ActionResult<Book>> SearchAndAddFromOpenLibraryAsync(string query) {
+    public async Task<ActionResult<Book>> SearchAndAddFromOpenLibrary(string query) {
         try {
             var book = await _bookService.SearchAndAddFromOpenLibraryAsync(query);
             return book == null ? NotFound("Book not found") : Ok(book);
@@ -75,11 +87,11 @@ public class BookController : BaseController<Book> {
         }
     }
 
-/// <summary>
-/// Create a new book.
-/// </summary>
-/// <param name="book"> The book object to create</param>
-/// <returns> A newly created book object</returns>
+    /// <summary>
+    /// Create a new book.
+    /// </summary>
+    /// <param name="book"> The book object to create</param>
+    /// <returns> A newly created book object</returns>
     public override async Task<ActionResult<Book>> Create(Book book) {
         try {
             ValidateBook(book);
