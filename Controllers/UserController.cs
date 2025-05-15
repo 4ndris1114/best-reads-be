@@ -2,6 +2,7 @@ using BestReads.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using BestReads.Models;
 using BestReads.Models.DTOs;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BestReads.Controllers;
 
@@ -21,6 +22,7 @@ public class UserController : ControllerBase
 /// </summary>
 /// <param name="id">The unique identifier for the user</param>
 /// <returns>A user object</returns>
+    [Authorize]
     [HttpGet("{id}")]
     public async Task<ActionResult<User>> GetUserById(string id) {
         try {
@@ -39,6 +41,7 @@ public class UserController : ControllerBase
 /// </summary>
 /// <param name="ids">A comma-separated list of user ids</param>
 /// <returns>A list of user objects</returns>
+    [Authorize]
     [HttpGet("batch")]
     public async Task<IActionResult> GetUsersByIds([FromQuery] string ids) {
         if (string.IsNullOrEmpty(ids))
@@ -56,6 +59,7 @@ public class UserController : ControllerBase
 /// <param name="id">The unique identifier for the user</param>
 /// <param name="user">The user object to update</param>
 /// <returns>A updated user object</returns>
+    [Authorize]
     [HttpPut("{id}/edit")]
     public async Task<ActionResult<User>> EditUser(string id, UpdateUserDTO user) {
         try {

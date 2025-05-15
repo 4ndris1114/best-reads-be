@@ -144,6 +144,7 @@ public class BookController : BaseController<Book> {
 /// </summary>
 /// <param name="id">A unique identifier for the book</param>
 /// <returns></returns>
+    [Authorize]
     public override async Task<ActionResult<Book>> Delete(string id) {
         try {
             var existingBook = await _bookRepository.GetByIdAsync(id);
