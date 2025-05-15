@@ -37,7 +37,7 @@ public class ActivityController : ControllerBase {
         if (user == null)
             return NotFound();
 
-        user.Following!.push(userId); // Include the user itself in the feed
+        user.Following!.Insert(0, userId); // Include the user itself in the feed
         var activities = await _activityRepository.GetRecentActivitiesAsync(user.Following!, skip, limit);
 
         return Ok(activities);
