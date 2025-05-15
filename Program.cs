@@ -35,7 +35,10 @@ builder.Services.AddSignalR();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigin",
-        policy => policy.WithOrigins("https://verdant-daifuku-7aa38c.netlify.app")
+        policy => policy.WithOrigins(
+                            "http://localhost:5173", 
+                            "https://verdant-daifuku-7aa38c.netlify.app"
+                        )
                         .AllowCredentials()
                         .AllowAnyHeader()
                         .AllowAnyMethod());
